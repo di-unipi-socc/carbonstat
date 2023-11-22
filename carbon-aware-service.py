@@ -1,12 +1,13 @@
-from flavours.interface import CarbonAwareStrategy
-from flavours.low_power import LowPowerStrategy
-from flavours.full_power import FullPowerStrategy
-
 from datetime import datetime
 from enum import Enum
 from flask import Flask
 
-# Enum the supported carbon-aware strategies
+# ------ STRATEGIES ------
+# Import and enum carbon-aware strategies (aka. flavours)
+from flavours.interface import CarbonAwareStrategy
+from flavours.low_power import LowPowerStrategy
+from flavours.full_power import FullPowerStrategy
+
 class CarbonAwareStrategies(Enum):
     LowPower = LowPowerStrategy
     FullPower = FullPowerStrategy
