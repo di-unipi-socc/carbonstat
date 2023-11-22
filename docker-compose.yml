@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  web:
+    image: "carbon-aware-service"
+    container_name: "carbon-aware-service"
+    build: .
+    ports:
+      - "50000:5000"
+    network_mode: bridge
