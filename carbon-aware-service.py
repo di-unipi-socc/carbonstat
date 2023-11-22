@@ -26,13 +26,13 @@ class Context:
 # ------ SERVICE ------
 app = Flask(__name__)
 
-@app.route("/get")
-def get():
+@app.route("/")
+def op():
     # TODO: add parameter extraction here, when needed
     # Get carbon-aware strategy
     strategy = Context.getCarbonAwareStrategy()
     # Invoke strategy with dynamic typing
-    answer = strategy.get()
+    answer = strategy.op()
     return answer
 
 app.run(host='0.0.0.0',port=50000)
