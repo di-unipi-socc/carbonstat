@@ -1,24 +1,10 @@
-from abc import ABC, abstractmethod
+from flavours.interface import CarbonAwareStrategy
+from flavours.low_power import LowPowerStrategy
+from flavours.full_power import FullPowerStrategy
+
 from datetime import datetime
 from enum import Enum
 from flask import Flask
-
-# ------ STRATEGIES ------
-# Abstract carbon-aware strategy
-class CarbonAwareStrategy(ABC):
-    @abstractmethod
-    def get() -> str:
-        pass
-
-# Low power strategy
-class LowPowerStrategy(CarbonAwareStrategy):
-    def get() -> str:
-        return "Running low power.."
-
-# Full power strategy
-class FullPowerStrategy(CarbonAwareStrategy):
-    def get() -> str:
-        return "Running full power!!"
 
 # Enum the supported carbon-aware strategies
 class CarbonAwareStrategies(Enum):

@@ -1,9 +1,16 @@
 FROM python:3-alpine
 
-COPY * /service/
-WORKDIR /service
+# Set working directory
+WORKDIR /cas
+
+# Install needed Python modules
+COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
-EXPOSE 50000
+# Copy service's sources
+COPY carbon-aware-service.py .
+ADD flavours flavours
 
+# Expose and run service
+EXPOSE 50000
 CMD python3 carbon-aware-service.py
