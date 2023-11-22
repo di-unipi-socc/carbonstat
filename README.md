@@ -1,4 +1,4 @@
-# Green-flavoured, carbon-aware service
+# CAS: Carbon-Aware Strategies (for containerized services)
 To run the current app: 
 ```
 $ docker-compose build
