@@ -1,6 +1,7 @@
 # Green-flavoured, carbon-aware service
 To run the current app: 
 > docker-compose build
+
 > docker-compose up
 
 Then, you can try it by simply running
