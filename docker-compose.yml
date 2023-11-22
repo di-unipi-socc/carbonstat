@@ -6,5 +6,5 @@ services:
     container_name: "carbon-aware-service"
     build: .
     ports:
-      - "50000:5000"
+      - "50000:50000"
     network_mode: bridge
