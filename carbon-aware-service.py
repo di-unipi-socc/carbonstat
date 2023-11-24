@@ -40,7 +40,7 @@ app = Flask(__name__)
 # generate random data
 generator = random.Generator(random.PCG64())
 rand = lambda : round(generator.random()*10000)
-app.data = [rand() for i in range(1000000)]
+app.data = [rand() for i in range(5000000)]
 
 # set service's context
 app.context = Context()
@@ -57,13 +57,11 @@ def nop():
 def avg():
     # Get carbon-aware strategy
     strategy = app.context.getCarbonAwareStrategy()
-    # Invoke strategy with dynamic typing
-    result = {}
-    start = datetime.now().microsecond/1000
-    result["average"] = strategy.avg(app.data)
-    end = datetime.now().microsecond/1000
-    print(round(end - start))
-    return jsonify(result)
-
+    # Invoke strategy with dynamic typing (and measure running time)
+    start = datetime.now()
+    average = strategy.avg(app.data)
+    elapsed = round((datetime.now() - start).microseconds/1000)
+    # Return result and elapsed time
+    return jsonify({ "average": average, "elapsed_time": elapsed })
 
 app.run(host='0.0.0.0',port=50000)
