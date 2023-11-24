@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
-from flask import Flask
+from flask import Flask,jsonify
+from numpy import random
 
 # Carbon intensity reader (mock)
 from carbon.reader_mock import CarbonIntensityReader
@@ -28,7 +29,6 @@ class Context:
      
     def getCarbonAwareStrategy(self) -> CarbonAwareStrategy:
         co2 = self.carbonIntensityReader.read()
-        print(co2)
         if (co2 >= 1000):
             return CarbonAwareStrategies.LowPower.value
         else:
@@ -36,15 +36,34 @@ class Context:
 
 # ------ SERVICE ------
 app = Flask(__name__)
+
+# generate random data
+generator = random.Generator(random.PCG64())
+rand = lambda : round(generator.random()*10000)
+app.data = [rand() for i in range(1000000)]
+
+# set service's context
 app.context = Context()
 
 @app.route("/")
-def op():
-    # TODO: add parameter extraction here, when needed
+def nop():
     # Get carbon-aware strategy
     strategy = app.context.getCarbonAwareStrategy()
     # Invoke strategy with dynamic typing
-    answer = strategy.op()
+    answer = strategy.nop()
     return answer
+
+@app.route("/avg")
+def avg():
+    # Get carbon-aware strategy
+    strategy = app.context.getCarbonAwareStrategy()
+    # Invoke strategy with dynamic typing
+    result = {}
+    start = datetime.now().microsecond/1000
+    result["average"] = strategy.avg(app.data)
+    end = datetime.now().microsecond/1000
+    print(round(end - start))
+    return jsonify(result)
+
 
 app.run(host='0.0.0.0',port=50000)
