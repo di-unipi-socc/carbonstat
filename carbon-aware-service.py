@@ -25,11 +25,12 @@ class Context:
     
     # initializer
     def __init__(self):
+        self.co2 = None
         self.carbonIntensityReader = CarbonIntensityReader(100,500,1500)
      
     def getCarbonAwareStrategy(self) -> CarbonAwareStrategy:
-        co2 = self.carbonIntensityReader.read()
-        if (co2 >= 1000):
+        self.co2 = self.carbonIntensityReader.read()
+        if (self.co2 >= 1000):
             return CarbonAwareStrategies.LowPower.value
         else:
             return CarbonAwareStrategies.FullPower.value
@@ -62,6 +63,10 @@ def avg():
     average = strategy.avg(app.data)
     elapsed = round((datetime.now() - start).microseconds/1000)
     # Return result and elapsed time
-    return jsonify({ "average": average, "elapsed_time": elapsed })
+    result = {}
+    result["average"] = average
+    result["elapsed"] = elapsed
+    result["co2"] = app.context.co2
+    return jsonify(result)
 
 app.run(host='0.0.0.0',port=50000)
