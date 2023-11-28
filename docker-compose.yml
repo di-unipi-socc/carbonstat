@@ -7,11 +7,10 @@ services:
     build: .
     environment:
       - STARTING_CO2=100
-      - CO2_STEP=500
-      - CO2_LIMIT=2700
+      - CO2_STEP=100
+      - CO2_LIMIT=3000
       - FULLPOWER_LIMIT=1000
       - MEDIUMPOWER_LIMIT=2000
-      - EXPERIMENT_SIZE=10000000
     ports:
       - "50000:50000"
     network_mode: bridge
