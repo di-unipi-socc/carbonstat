@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  cas:
+    image: "carbon-aware-service"
+    container_name: "carbon-aware-service"
+    build: .
+    environment:
+      - STARTING_CO2=CO2START
+      - CO2_STEP=CO2STEP
+      - CO2_LIMIT=CO2LIMIT
+      - FULLPOWER_LIMIT=FPLIMIT
+      - MEDIUMPOWER_LIMIT=MPLIMIT
+      - EXPERIMENT_SIZE=EXPSIZE
+    ports:
+      - "50000:50000"
+    network_mode: bridge

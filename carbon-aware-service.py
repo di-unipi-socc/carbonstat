@@ -50,7 +50,7 @@ app = Flask(__name__)
 
 # generate random data
 generator = random.Generator(random.PCG64())
-rand = lambda : round(generator.random()*10000)
+rand = lambda : round(generator.random()*100000000)
 size = int(environ["EXPERIMENT_SIZE"])
 app.data = [rand() for i in range(size)]
 
@@ -77,8 +77,8 @@ def avg():
     result = {}
     result["average"] = average
     result["elapsed"] = elapsed
-    # result["strategy"] = strategy.nop()
-    result["co2"] = app.context.co2
+    result["strategy"] = strategy.nop()
+    result["carbon"] = app.context.co2
     return jsonify(result)
 
 app.run(host='0.0.0.0',port=50000)

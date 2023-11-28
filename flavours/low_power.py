@@ -8,7 +8,7 @@ class LowPowerStrategy(CarbonAwareStrategy):
 
     def avg(data) -> float:
         sum = 0
-        step = 100
+        step = 10000
         size = len(data)
         for i in range(0,size,step):
             sum += data[i]
