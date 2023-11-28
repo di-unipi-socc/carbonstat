@@ -77,7 +77,7 @@ def avg():
     result = {}
     result["average"] = average
     result["elapsed"] = elapsed
-    result["strategy"] = strategy.nop()
+    # result["strategy"] = strategy.nop()
     result["co2"] = app.context.co2
     return jsonify(result)
 
