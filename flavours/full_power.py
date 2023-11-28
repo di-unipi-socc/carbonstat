@@ -4,7 +4,7 @@ from flavours.interface import CarbonAwareStrategy
 class FullPowerStrategy(CarbonAwareStrategy):
     
     def nop() -> str:
-        return "Running full power!!\n"
+        return "FULL_POWER"
     
     def avg(data) -> float:
         sum = 0

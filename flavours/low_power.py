@@ -4,11 +4,11 @@ from flavours.interface import CarbonAwareStrategy
 class LowPowerStrategy(CarbonAwareStrategy):
 
     def nop() -> str:
-        return "Running low power..\n"
+        return "LOW_POWER"
 
     def avg(data) -> float:
         sum = 0
-        step = 50
+        step = 100
         size = len(data)
         for i in range(0,size,step):
             sum += data[i]

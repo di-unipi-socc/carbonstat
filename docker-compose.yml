@@ -1,10 +1,17 @@
 version: "3.8"
 
 services:
-  web:
+  cas:
     image: "carbon-aware-service"
     container_name: "carbon-aware-service"
     build: .
+    environment:
+      - STARTING_CO2=100
+      - CO2_STEP=500
+      - CO2_LIMIT=2700
+      - FULLPOWER_LIMIT=1000
+      - MEDIUMPOWER_LIMIT=2000
+      - EXPERIMENT_SIZE=10000000
     ports:
       - "50000:50000"
     network_mode: bridge
