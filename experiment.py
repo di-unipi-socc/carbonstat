@@ -7,13 +7,14 @@ def update(policyResult,getReply):
     policyResult["values"].append(float(getReply["average"]))
     policyResult["carbon"] += float(getReply["carbon"])*float(getReply["elapsed"])/1000 # assuming carbon per second, elapsed in millisecond
 def process(policyResult,referenceValue):
+    policyResult["carbon"] = round(policyResult["carbon"],2)
     values = policyResult.pop("values")
     policyResult["queries"] = len(values)
     avg = 0
     for val in values: 
         avg += val
     avg = avg / len(values)
-    policyResult["average"] = avg
+    policyResult["average"] = round(avg,2)
     if (referenceValue is not None):
         deviation = abs(avg - referenceValue)
         policyResult["precision"] = 100 - round(deviation/referenceValue*100,2)
@@ -21,8 +22,7 @@ def process(policyResult,referenceValue):
         policyResult["precision"] = 100
 
 # experiment configuration
-queries = 10000
-experimentSize = "1000000"
+queries = 10
 carbonMock = { "start": "100", "step": "500", "limit": "3100"}
 policies = [
     { "name": "wasting", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 

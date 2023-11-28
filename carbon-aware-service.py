@@ -1,7 +1,6 @@
 from datetime import datetime
 from enum import Enum
 from flask import Flask,jsonify
-from numpy import random
 from os import environ
 
 # Carbon intensity reader (mock)
@@ -48,11 +47,12 @@ class Context:
 # ------ SERVICE ------
 app = Flask(__name__)
 
-# generate random data
-generator = random.Generator(random.PCG64())
-rand = lambda : round(generator.random()*100000000)
-size = int(environ["EXPERIMENT_SIZE"])
-app.data = [rand() for i in range(size)]
+# app data
+with open("data/numbers.txt","r") as numbers:
+    values = numbers.read().split(",")
+    app.data = [] 
+    for val in values:
+        app.data.append(int(val))
 
 # set service's context
 app.context = Context()
@@ -72,7 +72,7 @@ def avg():
     # Invoke strategy with dynamic typing (and measure running time)
     start = datetime.now()
     average = strategy.avg(app.data)
-    elapsed = round((datetime.now() - start).microseconds/1000)
+    elapsed = round((datetime.now() - start).microseconds/1000,2)
     # Return result and elapsed time
     result = {}
     result["average"] = average

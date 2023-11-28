@@ -162,3 +162,4 @@ cython_debug/
 # experiment generated files
 experiment-deploy.yml
 results.txt
+data/numbers.txt
