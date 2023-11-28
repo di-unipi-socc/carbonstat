@@ -14,9 +14,9 @@ ADD flavours flavours
 
 # Add service's data
 ADD data data
-WORKDIR ./data
+WORKDIR /cas/data
 RUN python3 generate.py
-WORKDIR ..
+WORKDIR /cas
 
 # Expose and run service
 EXPOSE 50000
