@@ -9,11 +9,13 @@ from carbon.reader_mock import CarbonIntensityReader
 # ------ STRATEGIES ------
 # Import and enum carbon-aware strategies (aka. flavours)
 from flavours.interface import CarbonAwareStrategy
-from flavours.low_power import LowPowerStrategy
 from flavours.full_power import FullPowerStrategy
+from flavours.low_power import LowPowerStrategy
+from flavours.medium_power import MediumPowerStrategy
 
 class CarbonAwareStrategies(Enum):
     LowPower = LowPowerStrategy
+    MediumPower = MediumPowerStrategy
     FullPower = FullPowerStrategy
 
 # ------ CONTEXT ------
@@ -26,14 +28,16 @@ class Context:
     # initializer
     def __init__(self):
         self.co2 = None
-        self.carbonIntensityReader = CarbonIntensityReader(100,500,1500)
+        self.carbonIntensityReader = CarbonIntensityReader(100,500,2700)
      
     def getCarbonAwareStrategy(self) -> CarbonAwareStrategy:
         self.co2 = self.carbonIntensityReader.read()
-        if (self.co2 >= 1000):
-            return CarbonAwareStrategies.LowPower.value
-        else:
+        if (self.co2 < 1000):
             return CarbonAwareStrategies.FullPower.value
+        elif (self.co2 < 2000):
+            return CarbonAwareStrategies.MediumPower.value
+        else:
+            return CarbonAwareStrategies.LowPower.value
 
 # ------ SERVICE ------
 app = Flask(__name__)
