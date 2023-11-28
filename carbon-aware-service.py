@@ -37,9 +37,9 @@ class Context:
      
     def getCarbonAwareStrategy(self) -> CarbonAwareStrategy:
         self.co2 = self.carbonIntensityReader.read()
-        if (self.co2 < self.fullPowerLimit):
+        if (self.co2 <= self.fullPowerLimit):
             return CarbonAwareStrategies.FullPower.value
-        elif (self.co2 < self.mediumPowerLimit):
+        elif (self.co2 <= self.mediumPowerLimit):
             return CarbonAwareStrategies.MediumPower.value
         else:
             return CarbonAwareStrategies.LowPower.value
@@ -75,7 +75,7 @@ def avg():
     elapsed = round((datetime.now() - start).microseconds/1000,2)
     # Return result and elapsed time
     result = {}
-    result["average"] = average
+    result["value"] = average
     result["elapsed"] = elapsed
     result["strategy"] = strategy.nop()
     result["carbon"] = app.context.co2

@@ -163,3 +163,4 @@ cython_debug/
 experiment-deploy.yml
 results.txt
 data/numbers.txt
+log.txt
