@@ -22,8 +22,8 @@ def process(policyResult,referenceValue):
         policyResult["precision"] = 100
 
 # experiment configuration
-queries = 10
-carbonMock = { "start": "100", "step": "500", "limit": "3100"}
+queries = 10000
+carbonMock = { "start": "0", "step": "150", "limit": "3000"}
 policies = [
     { "name": "wasting", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 
     { "name": "balanced", "fullPowerLimit": "1000", "mediumPowerLimit": "2000"}, 
@@ -44,7 +44,6 @@ for policy in policies:
     experiment = experiment.replace("CO2LIMIT",carbonMock["limit"])
     experiment = experiment.replace("FPLIMIT",policy["fullPowerLimit"])
     experiment = experiment.replace("MPLIMIT",policy["mediumPowerLimit"])
-    experiment = experiment.replace("EXPSIZE",experimentSize)
     with (open("experiment-deploy.yml","w")) as experimentDeploy: 
         experimentDeploy.write(experiment)
     
