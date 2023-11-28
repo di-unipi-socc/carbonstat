@@ -23,7 +23,7 @@ def process(policyResult,referenceValue):
 
 # experiment configuration
 queries = 10000
-carbonMock = { "start": "0", "step": "150", "limit": "3000"}
+carbonMock = { "start": "0", "step": "200", "limit": "3000"}
 policies = [
     { "name": "wasting", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 
     { "name": "balanced", "fullPowerLimit": "1000", "mediumPowerLimit": "2000"}, 
