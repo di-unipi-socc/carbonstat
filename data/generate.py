@@ -3,7 +3,7 @@ import random
 # configuration for random number generation
 maxN = 1000000000
 rand = lambda min,max : random.SystemRandom().randint(min,max)
-size = 100000
+size = 1000000
 
 # generate random numbers
 values = []

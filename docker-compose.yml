@@ -6,8 +6,8 @@ services:
     container_name: "carbon-aware-service"
     build: .
     environment:
-      - STARTING_CO2=100
-      - CO2_STEP=100
+      - STARTING_CO2=0
+      - CO2_STEP=500
       - CO2_LIMIT=3000
       - FULLPOWER_LIMIT=1000
       - MEDIUMPOWER_LIMIT=2000

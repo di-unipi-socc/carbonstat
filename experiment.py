@@ -28,7 +28,7 @@ def process(policyResult,referenceValue):
         policyResult["precision"] = 100
 
 # experiment configuration
-repetitions = 5
+repetitions = 1
 queries = 1000
 carbonMock = { "start": "0", "step": "200", "limit": "3000"}
 policies = [
@@ -39,8 +39,9 @@ policies = [
     { "name": "super-saving", "fullPowerLimit": "200", "mediumPowerLimit": "1000"}, 
 ]
 
-# clean result file (if any)
+# clean result and log file (if any)
 os.system("rm results.txt 2>/dev/null")
+os.system("rm log.txt 2>/dev/null")
 
 iterations = []
 for i in range(repetitions):
@@ -68,8 +69,8 @@ for i in range(repetitions):
         print("- Compose file built")
         
         # build and deploy experiment
-        os.system("docker compose -f experiment-deploy.yml build > log.txt 2> log.txt")
-        os.system("docker compose -f experiment-deploy.yml up -d > log.txt 2> log.txt")
+        os.system("docker compose -f experiment-deploy.yml build 2>> log.txt")
+        os.system("docker compose -f experiment-deploy.yml up -d 2>> log.txt")
         sleep(10)
         print("- Application up and running")
 
@@ -89,7 +90,7 @@ for i in range(repetitions):
         print("- All queries sent")
 
         # undeploy experiment
-        os.system("docker compose -f experiment-deploy.yml down > log.txt 2> log.txt")
+        os.system("docker compose -f experiment-deploy.yml down 2>> log.txt")
         print("- Application undeployed")
 
         # process queries' results and append them to collection of results
@@ -123,6 +124,3 @@ with open("results.txt","a") as results:
         results.write(policy + "\n")
         for flavour in overallResult[policy]:
             results.write(flavour + " > " + str(overallResult[policy][flavour]) + "\n")
-
-# clean useless logs
-os.system("rm logs.txt")
