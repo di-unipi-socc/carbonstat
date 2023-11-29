@@ -30,7 +30,7 @@ def process(policyResult,referenceValue):
 # experiment configuration
 repetitions = 5
 queries = 1000
-carbonMock = { "start": "0", "step": "800", "limit": "3000"}
+carbonMock = { "start": "0", "step": "200", "limit": "3000"}
 policies = [
     { "name": "super-power-hungry", "fullPowerLimit": "2000", "mediumPowerLimit": "2800"}, 
     { "name": "power-hungry", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 
