@@ -32,9 +32,11 @@ repetitions = 5
 queries = 1000
 carbonMock = { "start": "0", "step": "800", "limit": "3000"}
 policies = [
-    { "name": "wasting", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 
+    { "name": "super-power-hungry", "fullPowerLimit": "2000", "mediumPowerLimit": "2800"}, 
+    { "name": "power-hungry", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 
     { "name": "balanced", "fullPowerLimit": "1000", "mediumPowerLimit": "2000"}, 
-    { "name": "saving", "fullPowerLimit": "500", "mediumPowerLimit": "1000"}, 
+    { "name": "saving", "fullPowerLimit": "500", "mediumPowerLimit": "1500"}, 
+    { "name": "super-saving", "fullPowerLimit": "200", "mediumPowerLimit": "1000"}, 
 ]
 
 # clean result file (if any)
