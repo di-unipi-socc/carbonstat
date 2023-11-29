@@ -28,7 +28,7 @@ def process(policyResult,referenceValue):
         policyResult["precision"] = 100
 
 # experiment configuration
-repetitions = 1
+repetitions = 5
 queries = 1000
 carbonMock = { "start": "0", "step": "200", "limit": "3000"}
 policies = [
@@ -69,7 +69,7 @@ for i in range(repetitions):
         print("- Compose file built")
         
         # build and deploy experiment
-        os.system("docker compose -f experiment-deploy.yml build 2>> log.txt")
+        os.system("docker compose -f experiment-deploy.yml build >> log.txt 2>> log.txt")
         os.system("docker compose -f experiment-deploy.yml up -d 2>> log.txt")
         sleep(10)
         print("- Application up and running")
