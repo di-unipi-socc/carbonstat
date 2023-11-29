@@ -1,12 +1,21 @@
-from numpy import random
+import random
 
 # configuration for random number generation
-generator = random.Generator(random.PCG64())
-rand = lambda : str(round(generator.random()*100000000))
-size = 1000000
+maxN = 1000000000
+rand = lambda min,max : random.SystemRandom().randint(min,max)
+size = 100000
+
+# generate random numbers
+values = []
+for i in range(size):
+    pivot = rand(0,1) # used to obtain high stdev
+    if pivot:
+        values.append(rand(1,round(maxN/4)))
+    else:
+        values.append(rand(round(3*maxN/4),maxN))
 
 # generation of random numbers in file
 with open("numbers.txt","w") as numbers:
-    numbers.write(rand())
-    for i in range(size-1):
-        numbers.write("," + rand())
+    numbers.write(str(values[0]))
+    for i in range(1,size):
+        numbers.write("," + str(values[i]))
