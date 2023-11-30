@@ -1,5 +1,7 @@
 from flavours.interface import CarbonAwareStrategy
 
+import random
+
 # Low power strategy
 class LowPowerStrategy(CarbonAwareStrategy):
 
@@ -8,12 +10,12 @@ class LowPowerStrategy(CarbonAwareStrategy):
 
     def avg(data) -> float:
         sum = 0
-        # consider 1 number every square_root(len(data))
-        step = round((len(data))**(1/2))
+        # step set to consider 0.1% of the data
+        step = 1000
         # compute avg 
         count = 0
         size = len(data)
         for i in range(0,size,step):
             count += 1
             sum += data[i]
-        return sum/count
+        return round(sum/count)

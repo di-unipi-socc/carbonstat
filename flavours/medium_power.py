@@ -1,4 +1,5 @@
 from flavours.interface import CarbonAwareStrategy
+import random
 
 # Medium power strategy
 class MediumPowerStrategy(CarbonAwareStrategy):
@@ -8,12 +9,12 @@ class MediumPowerStrategy(CarbonAwareStrategy):
 
     def avg(data) -> float:
         sum = 0
-        # consider 1 number every cube_root(len(data))
-        step = round(len(data)*(1/3))
+        # step set to consider 5% of the data
+        step = 20
         # compute avg 
         count = 0
         size = len(data)
         for i in range(0,size,step):
             count += 1
             sum += data[i]
-        return sum/count
+        return round(sum/count)

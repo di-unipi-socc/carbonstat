@@ -11,4 +11,4 @@ class HighPowerStrategy(CarbonAwareStrategy):
         size = len(data)
         for i in range(0,size):
             sum += data[i]
-        return sum/size
+        return round(sum/size)
