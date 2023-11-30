@@ -6,6 +6,7 @@ from time import sleep
 # function to process policy results
 def update(policyResult,getReply):
     policyResult["values"].append(float(getReply["value"]))
+    # TODO: measure carbon considering kwh
     policyResult["carbon"] += float(getReply["carbon"])*float(getReply["elapsed"])/1000 # assuming carbon per second, elapsed in millisecond
 def process(policyResult,referenceValue):
     # remove returned values
@@ -28,10 +29,11 @@ def process(policyResult,referenceValue):
         policyResult["precision"] = 100
 
 # experiment configuration
-repetitions = 5
+repetitions = 1
 queries = 1000
 carbonMock = { "start": "0", "step": "200", "limit": "3000"}
 policies = [
+   # TODO: { "name": "carbon-unaware", "fullPowerLimit": "1000000", "mediumPowerLimit": "20000000"},
     { "name": "super-power-hungry", "fullPowerLimit": "2000", "mediumPowerLimit": "2800"}, 
     { "name": "power-hungry", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 
     { "name": "balanced", "fullPowerLimit": "1000", "mediumPowerLimit": "2000"}, 
@@ -45,6 +47,7 @@ os.system("rm log.txt 2>/dev/null")
 
 iterations = []
 for i in range(repetitions):
+    # TODO: force rebuild of dataset 
 
     print("*** ITERATION: " + str(i) + " ***")
     ithResult = {}
@@ -62,14 +65,14 @@ for i in range(repetitions):
         experiment = experiment.replace("CO2START",carbonMock["start"])
         experiment = experiment.replace("CO2STEP",carbonMock["step"])
         experiment = experiment.replace("CO2LIMIT",carbonMock["limit"])
-        experiment = experiment.replace("FPLIMIT",policy["fullPowerLimit"])
+        experiment = experiment.replace("HPLIMIT",policy["fullPowerLimit"])
         experiment = experiment.replace("MPLIMIT",policy["mediumPowerLimit"])
         with (open("experiment-deploy.yml","w")) as experimentDeploy: 
             experimentDeploy.write(experiment)
         print("- Compose file built")
         
         # build and deploy experiment
-        os.system("docker compose -f experiment-deploy.yml build >> log.txt 2>> log.txt")
+        os.system("docker compose -f experiment-deploy.yml build >> log.txt 2>> log.txt") # TODO: move earlier (see comment)
         os.system("docker compose -f experiment-deploy.yml up -d 2>> log.txt")
         sleep(10)
         print("- Application up and running")

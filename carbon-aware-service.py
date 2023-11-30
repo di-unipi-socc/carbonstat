@@ -9,14 +9,14 @@ from carbon.reader_mock import CarbonIntensityReader
 # ------ STRATEGIES ------
 # Import and enum carbon-aware strategies (aka. flavours)
 from flavours.interface import CarbonAwareStrategy
-from flavours.full_power import FullPowerStrategy
 from flavours.low_power import LowPowerStrategy
 from flavours.medium_power import MediumPowerStrategy
+from flavours.high_power import HighPowerStrategy
 
 class CarbonAwareStrategies(Enum):
     LowPower = LowPowerStrategy
     MediumPower = MediumPowerStrategy
-    FullPower = FullPowerStrategy
+    HighPower = HighPowerStrategy
 
 # ------ CONTEXT ------
 # Carbon-aware context
@@ -28,7 +28,7 @@ class Context:
     # initializer
     def __init__(self):
         self.co2 = None
-        self.fullPowerLimit = float(environ["FULLPOWER_LIMIT"])
+        self.highPowerLimit = float(environ["HIGHPOWER_LIMIT"])
         self.mediumPowerLimit = float(environ["MEDIUMPOWER_LIMIT"])
         startingCO2 = float(environ["STARTING_CO2"])
         stepCO2 = float(environ["CO2_STEP"])
@@ -37,8 +37,8 @@ class Context:
      
     def getCarbonAwareStrategy(self) -> CarbonAwareStrategy:
         self.co2 = self.carbonIntensityReader.read()
-        if (self.co2 <= self.fullPowerLimit):
-            return CarbonAwareStrategies.FullPower.value
+        if (self.co2 <= self.highPowerLimit):
+            return CarbonAwareStrategies.HighPower.value
         elif (self.co2 <= self.mediumPowerLimit):
             return CarbonAwareStrategies.MediumPower.value
         else:

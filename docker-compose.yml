@@ -9,7 +9,7 @@ services:
       - STARTING_CO2=0
       - CO2_STEP=500
       - CO2_LIMIT=3000
-      - FULLPOWER_LIMIT=1000
+      - HIGHPOWER_LIMIT=1000
       - MEDIUMPOWER_LIMIT=2000
     ports:
       - "50000:50000"
