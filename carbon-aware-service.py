@@ -84,7 +84,8 @@ def avg():
     # Invoke strategy with dynamic typing (and measure running time)
     start = datetime.now()
     average = strategy.avg(app.data)
-    elapsed = round((datetime.now() - start).microseconds/1000,2)
+    end = datetime.now()
+    elapsed = round((end.timestamp() - start.timestamp())*1000,2)
     # Return result and elapsed time
     result = {}
     result["value"] = average
