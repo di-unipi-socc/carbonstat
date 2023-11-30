@@ -10,9 +10,9 @@ values = []
 for i in range(size):
     pivot = rand(0,1) # used to obtain high stdev
     if pivot:
-        values.append(rand(1,round(maxN/4)))
+        values.append(rand(1,round(maxN/6)))
     else:
-        values.append(rand(round(3*maxN/4),maxN))
+        values.append(rand(round(5*maxN/6),maxN))
 
 # generation of random numbers in file
 with open("numbers.txt","w") as numbers:
