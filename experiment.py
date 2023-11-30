@@ -3,11 +3,16 @@ import os
 from requests import get
 from time import sleep
 
-# function to process policy results
+# function to update (ongoing) policy results
 def update(policyResult,getReply):
     policyResult["values"].append(float(getReply["value"]))
-    # TODO: measure carbon considering kwh
-    policyResult["carbon"] += float(getReply["carbon"])*float(getReply["elapsed"])/1000 # assuming carbon per second, elapsed in millisecond
+    # measure carbon emission considering carbon intensity, elapsed time, and power consumption
+    carbonIntensity = float(getReply["carbon"])*1000 # mg of co2-eq/(kW*h)
+    elapsedTime = float(getReply["elapsed"])/(3600*1000) # elapsed hours for computation (h)
+    power = 0.05 # worst-case power consumption of my laptop(kW) 
+    policyResult["carbon"] += carbonIntensity * power * elapsedTime
+
+# function to post-process policy results (measuring precision against a ref value)
 def process(policyResult,referenceValue):
     # remove returned values
     values = policyResult.pop("values")
@@ -17,9 +22,10 @@ def process(policyResult,referenceValue):
     policyResult["queries"] = len(values)
     # compute average of returned values
     avg = 0
-    for val in values: 
-        avg += val
-    avg = avg / len(values)
+    if len(values) > 0: 
+        for val in values: 
+            avg += val
+        avg = avg / len(values)
     policyResult["average"] = round(avg,2)
     # compute precision (approx vs actual average)
     if (referenceValue is not None):
@@ -29,16 +35,16 @@ def process(policyResult,referenceValue):
         policyResult["precision"] = 100
 
 # experiment configuration
-repetitions = 1
+repetitions = 10
 queries = 1000
-carbonMock = { "start": "0", "step": "200", "limit": "3000"}
+carbonMock = { "start": "5", "step": "20", "limit": "1100"} # from (solar) 5g to (coal) 1100g of CO2-eq/kWh
 policies = [
-   # TODO: { "name": "carbon-unaware", "fullPowerLimit": "1000000", "mediumPowerLimit": "20000000"},
-    { "name": "super-power-hungry", "fullPowerLimit": "2000", "mediumPowerLimit": "2800"}, 
-    { "name": "power-hungry", "fullPowerLimit": "1500", "mediumPowerLimit": "2500"}, 
-    { "name": "balanced", "fullPowerLimit": "1000", "mediumPowerLimit": "2000"}, 
-    { "name": "saving", "fullPowerLimit": "500", "mediumPowerLimit": "1500"}, 
-    { "name": "super-saving", "fullPowerLimit": "200", "mediumPowerLimit": "1000"}, 
+    { "name": "carbon-unaware", "highPowerLimit": "2000", "mediumPowerLimit": "2100"},
+    { "name": "super-power-hungry", "highPowerLimit": "850", "mediumPowerLimit": "1000"}, 
+    { "name": "power-hungry", "highPowerLimit": "750", "mediumPowerLimit": "950"}, 
+    { "name": "balanced", "highPowerLimit": "350", "mediumPowerLimit": "750"}, 
+    { "name": "saving", "highPowerLimit": "150", "mediumPowerLimit": "350"}, 
+    { "name": "super-saving", "highPowerLimit": "100", "mediumPowerLimit": "250"}, 
 ]
 
 # clean result and log file (if any)
@@ -47,16 +53,19 @@ os.system("rm log.txt 2>/dev/null")
 
 iterations = []
 for i in range(repetitions):
-    # TODO: force rebuild of dataset 
-
-    print("*** ITERATION: " + str(i) + " ***")
-    ithResult = {}
-    iterations.append(ithResult)
+    print("\nITERATION: " + str(i))
+    
+    # force re-build of image, to re-create dataset
+    print("|- Building Docker image...", end="\r")
+    os.system("docker compose -f experiment-template.yml build --no-cache >> log.txt 2>> log.txt")
+    print("|- Building Docker image...done!")
 
     # run i-th experiment
+    ithResult = {}
+    iterations.append(ithResult)
     for policy in policies:
         policyName = policy["name"]
-        print("Policy: " + policyName)
+        print("|- Policy: " + policyName)
 
         # config experiment's deployment (from template)
         template = open("experiment-template.yml") 
@@ -65,19 +74,19 @@ for i in range(repetitions):
         experiment = experiment.replace("CO2START",carbonMock["start"])
         experiment = experiment.replace("CO2STEP",carbonMock["step"])
         experiment = experiment.replace("CO2LIMIT",carbonMock["limit"])
-        experiment = experiment.replace("HPLIMIT",policy["fullPowerLimit"])
+        experiment = experiment.replace("HPLIMIT",policy["highPowerLimit"])
         experiment = experiment.replace("MPLIMIT",policy["mediumPowerLimit"])
         with (open("experiment-deploy.yml","w")) as experimentDeploy: 
             experimentDeploy.write(experiment)
-        print("- Compose file built")
         
-        # build and deploy experiment
-        os.system("docker compose -f experiment-deploy.yml build >> log.txt 2>> log.txt") # TODO: move earlier (see comment)
-        os.system("docker compose -f experiment-deploy.yml up -d 2>> log.txt")
+        # deploy configured experiment
+        print("|  |- Deploying carbon-aware service...", end="\r")
+        os.system("docker compose -f experiment-deploy.yml up -d >> log.txt 2>> log.txt")
         sleep(10)
-        print("- Application up and running")
+        print("|  |- Deploying carbon-aware service...done!")
 
         # send queries and collect results
+        print("|  |- Sending queries...", end="\r")
         ithResult[policyName] = {}
         ithResult[policyName]["low"] = { "values": [], "carbon": 0 }
         ithResult[policyName]["medium"] = { "values": [], "carbon": 0 }
@@ -90,17 +99,22 @@ for i in range(repetitions):
                 update(ithResult[policyName]["medium"],getReply)
             else:
                 update(ithResult[policyName]["high"],getReply)
-        print("- All queries sent")
+        print("|  |- Sending queries...done!")
 
         # undeploy experiment
+        print("|  |- Undeploying carbon-aware service...", end="\r")
         os.system("docker compose -f experiment-deploy.yml down 2>> log.txt")
-        print("- Application undeployed")
+        print("|  |- Undeploying carbon-aware service...done!")
 
         # process queries' results and append them to collection of results
+        print("|  |- Post processing results...", end="\r")
         process(ithResult[policyName]["high"],None)
         process(ithResult[policyName]["medium"],ithResult[policyName]["high"]["average"])
         process(ithResult[policyName]["low"],ithResult[policyName]["high"]["average"])
-        print("- Post-processing completed")
+        print("|  |- Post processing results...done!")
+
+    # end of iteration
+    print("|- End of iteration")
 
 # combine results from different iterations
 overallResult = {}
