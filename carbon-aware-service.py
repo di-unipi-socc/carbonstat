@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from flask import Flask,jsonify
+from flask import Flask,request,jsonify
 from os import environ
 
 # Carbon intensity reader (mock)
@@ -35,14 +35,14 @@ class Context:
         limitCO2 = float(environ["CO2_LIMIT"])
         self.carbonIntensityReader = CarbonIntensityReader(startingCO2,stepCO2,limitCO2)
      
-    def getCarbonAwareStrategy(self) -> CarbonAwareStrategy:
+    def getCarbonAwareStrategy(self,green) -> CarbonAwareStrategy:
         self.co2 = self.carbonIntensityReader.read()
-        if (self.co2 <= self.highPowerLimit):
-            return CarbonAwareStrategies.HighPower.value
-        elif (self.co2 <= self.mediumPowerLimit):
-            return CarbonAwareStrategies.MediumPower.value
-        else:
-            return CarbonAwareStrategies.LowPower.value
+        if green:
+            if self.co2 > self.mediumPowerLimit:
+                return CarbonAwareStrategies.LowPower.value
+            elif self.co2 > self.highPowerLimit:
+                return CarbonAwareStrategies.MediumPower.value
+        return CarbonAwareStrategies.HighPower.value
 
 # ------ SERVICE ------
 app = Flask(__name__)
@@ -59,16 +59,28 @@ app.context = Context()
 
 @app.route("/")
 def nop():
+    # Parse params and check if forcing to not run approximated
+    greenParameter = request.args.get("green")
+    if greenParameter and greenParameter.lower() == "false":
+        green = False
+    else:
+        green = True
     # Get carbon-aware strategy
-    strategy = app.context.getCarbonAwareStrategy()
+    strategy = app.context.getCarbonAwareStrategy(green)
     # Invoke strategy with dynamic typing
     answer = strategy.nop() + "\n"
     return answer
 
 @app.route("/avg")
 def avg():
+    # Parse params and check if forcing to not run approximated
+    greenParameter = request.args.get("green")
+    if greenParameter and greenParameter.lower() == "false":
+        green = False
+    else:
+        green = True
     # Get carbon-aware strategy
-    strategy = app.context.getCarbonAwareStrategy()
+    strategy = app.context.getCarbonAwareStrategy(green)
     # Invoke strategy with dynamic typing (and measure running time)
     start = datetime.now()
     average = strategy.avg(app.data)
