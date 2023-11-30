@@ -8,8 +8,8 @@ class MediumPowerStrategy(CarbonAwareStrategy):
 
     def avg(data) -> float:
         sum = 0
-        # consider 1 number every 1000
-        step = 1000
+        # consider 1 number every cube_root(len(data))
+        step = round(len(data)*(1/3))
         # compute avg 
         count = 0
         size = len(data)
