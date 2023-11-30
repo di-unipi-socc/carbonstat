@@ -1,5 +1,4 @@
 import random
-import numpy as np
 
 # configuration for random number generation
 maxN = 10000
@@ -9,13 +8,10 @@ size = 1000000
 # generate random numbers
 values = []
 for i in range(size):
-    chunks = 4 # used to obtain high stdev
-    pivot = rand(0,chunks)**(i%5)%chunks 
-    start = round(pivot*maxN/chunks)
-    end = round((pivot+1)*maxN/chunks) 
-    values.append(rand(start,end))
-
-print(np.average(values),np.std(values))
+    if i%2 == 0:
+        values.append(rand(1,round(maxN/4)))
+    else:
+        values.append(rand(round(3*maxN/4),maxN))
 
 # generation of random numbers in file
 with open("numbers.txt","w") as numbers:

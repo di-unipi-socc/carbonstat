@@ -6,11 +6,11 @@ services:
     container_name: "carbon-aware-service"
     build: .
     environment:
-      - STARTING_CO2=0
-      - CO2_STEP=500
-      - CO2_LIMIT=3000
-      - HIGHPOWER_LIMIT=1000
-      - MEDIUMPOWER_LIMIT=2000
+      - STARTING_CO2=5
+      - CO2_STEP=250
+      - CO2_LIMIT=1100
+      - HIGHPOWER_LIMIT=400
+      - MEDIUMPOWER_LIMIT=800
     ports:
       - "50000:50000"
     network_mode: bridge

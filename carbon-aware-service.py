@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from flask import Flask,request,jsonify
 from os import environ
+import random
 
 # Carbon intensity reader (mock)
 from carbon.reader_mock import CarbonIntensityReader
@@ -53,6 +54,7 @@ with open("data/numbers.txt","r") as numbers:
     app.data = [] 
     for val in values:
         app.data.append(int(val))
+    random.shuffle(app.data)
 
 # set service's context
 app.context = Context()
