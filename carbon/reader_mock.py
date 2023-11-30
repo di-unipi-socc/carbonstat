@@ -20,4 +20,4 @@ class CarbonIntensityReader():
         if self.co2 >= self.upperbound: 
             self.direction = -1
         self.co2 += self.direction*self.step
-        return self.co2
+        return co2
