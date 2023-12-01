@@ -1,4 +1,3 @@
-import json
 import os
 from requests import get
 from time import sleep
@@ -51,21 +50,23 @@ policies = [
 os.system("rm results.txt 2>/dev/null")
 os.system("rm log.txt 2>/dev/null")
 
+logFile = open("exp.log",mode="w",buffering=1)
+
 iterations = []
 for i in range(repetitions):
-    print("\nITERATION: " + str(i))
+    logFile.write("\nITERATION: " + str(i) + "\n")
     
     # force re-build of image, to re-create dataset
-    print("|- Building Docker image...", end="\r")
+    logFile.write("|- Building Docker image...")
     os.system("docker compose -f experiment-template.yml build --no-cache >> log.txt 2>> log.txt")
-    print("|- Building Docker image...done!")
+    logFile.write("done!\n")
 
     # run i-th experiment
     ithResult = {}
     iterations.append(ithResult)
     for policy in policies:
         policyName = policy["name"]
-        print("|- Policy: " + policyName)
+        logFile.write("|- Policy: " + policyName + "\n")
 
         # config experiment's deployment (from template)
         template = open("experiment-template.yml") 
@@ -80,13 +81,13 @@ for i in range(repetitions):
             experimentDeploy.write(experiment)
         
         # deploy configured experiment
-        print("|  |- Deploying carbon-aware service...", end="\r")
+        logFile.write("|  |- Deploying carbon-aware service...")
         os.system("docker compose -f experiment-deploy.yml up -d >> log.txt 2>> log.txt")
         sleep(10)
-        print("|  |- Deploying carbon-aware service...done!")
+        logFile.write("done!\n")
 
         # send queries and collect results
-        print("|  |- Sending queries...", end="\r")
+        logFile.write("|  |- Sending queries...")
         ithResult[policyName] = {}
         ithResult[policyName]["low"] = { "values": [], "carbon": 0 }
         ithResult[policyName]["medium"] = { "values": [], "carbon": 0 }
@@ -99,22 +100,22 @@ for i in range(repetitions):
                 update(ithResult[policyName]["medium"],getReply)
             else:
                 update(ithResult[policyName]["high"],getReply)
-        print("|  |- Sending queries...done!")
+        logFile.write("done!\n")
 
         # undeploy experiment
-        print("|  |- Undeploying carbon-aware service...", end="\r")
+        logFile.write("|  |- Undeploying carbon-aware service...")
         os.system("docker compose -f experiment-deploy.yml down 2>> log.txt")
-        print("|  |- Undeploying carbon-aware service...done!")
+        logFile.write("done!\n")
 
         # process queries' results and append them to collection of results
-        print("|  |- Post processing results...", end="\r")
+        logFile.write("|  |- Post processing results...")
         process(ithResult[policyName]["high"],None)
         process(ithResult[policyName]["medium"],ithResult[policyName]["high"]["average"])
         process(ithResult[policyName]["low"],ithResult[policyName]["high"]["average"])
-        print("|  |- Post processing results...done!")
+        logFile.write("done!\n")
 
     # end of iteration
-    print("|- End of iteration")
+    logFile.write("|- End of iteration\n")
 
 # combine results from different iterations
 overallResult = {}
@@ -141,3 +142,6 @@ with open("results.txt","a") as results:
         results.write(policy + "\n")
         for flavour in overallResult[policy]:
             results.write(flavour + " > " + str(overallResult[policy][flavour]) + "\n")
+
+logFile.write("\n COMPLETED")
+logFile.close()
