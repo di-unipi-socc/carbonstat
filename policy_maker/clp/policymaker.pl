@@ -16,8 +16,7 @@ solution(Times, Strategies, Emissions, Precision) :-
     emissions(Strategies, Emissions).
 
 selectStrategy(Time, Strategy, P) :-
-    strategy(Strategy, _, _), requestRate(Time, R), 
-    precision(R, Strategy, P).
+    strategy(Strategy, _, _), requestRate(Time, R), precision(R, Strategy, P).
 
 thresholdCoherent(Times, Strategies) :-
     \+ (    
