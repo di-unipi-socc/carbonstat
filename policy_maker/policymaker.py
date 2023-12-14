@@ -72,7 +72,7 @@ def main():
     # create model 
     model = cp_model.CpModel()
 
-    # define variables (boolean variables assigning representing the assignment of strategy s at time t)
+    # define variables (boolean variables representing the assignment of strategy s at time t)
     assignment = {}
     for s in data["strategies"]:
         for t in data["time"]:
