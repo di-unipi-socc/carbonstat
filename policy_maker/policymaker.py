@@ -119,7 +119,7 @@ def main():
         )
     )
 
-    # solve problem
+    # find all possible solutions for the modelled problem
     solver = cp_model.CpSolver()
     solution_collector = SolutionCollector(assignment,data)
     status = solver.Solve(model,solution_collector)
