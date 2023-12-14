@@ -3,21 +3,20 @@
 :- consult('examples/example2.pl').
 
 %%% Main %%%
-go(DesiredP, (EF,PF,SF)) :-
+go(DesiredP, (EF,PF,S)) :-
     init(S, Times), minPrecision(DesiredP, MinP,TotReqs),
-    S ins 0..2, % strategies are numbered from 0 (hp) to 2 (lp)
-    P #>= MinP,          % precision is at least MinP
-    time(findall((E,P,S), solution(Times, S, E, P), Sols)),
-    sort(Sols, [(EF,PI,SF)|_]), PF is PI / TotReqs. % sort solutions by increasing emissions, take first
+    time(findall((E,P,S), solution(MinP,Times,S,E,P), Sols)),
+    sort(Sols, [(EF,PI,S)|_]), PF is PI / TotReqs. % sort solutions by increasing emissions, take first
 
-solution(Times, Strategies, Emissions, Precision) :-
+solution(MinP, Times, Strategies, Emissions, Precision) :-
+    Strategies ins 0..2, % strategies are numbered from 0 (hp) to 2 (lp)
+    Precision #>= MinP,          % precision is at least MinP
     maplist(selectStrategy, Times, Strategies, Precisions), 
     thresholdCoherent(Times, Strategies),
     sum(Precisions,#=,Precision),
     emissions(Strategies, Emissions).
 
-selectStrategy(Time, Strategy, P) :-
-    strategy(Strategy, _, _), requestRate(Time, R), precision(R, Strategy, P).
+selectStrategy(Time, Strategy, P) :- requestRate(Time, R), precision(R, Strategy, P).
 
 thresholdCoherent(Times, Strategies) :-
     \+ (    member(T1,Times), member(T2,Times), dif(T1,T2), 
