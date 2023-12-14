@@ -1,4 +1,5 @@
 from ortools.sat.python import cp_model
+import time
 
 # function to import input data
 def import_data():
@@ -10,7 +11,7 @@ def import_data():
     data["time"] = [0,1,2,3,4,5,6,7,8,9,10]
     data["rate"] = [3,4,5,2,1,6,7,2,5,6,7]
     data["carbon"] = [100,1000,5,200,1000,100,67,567,2,800,5]
-    data["precision_threshold"] = 94
+    data["precision_threshold"] = 100
     return data
 
 # function to compute the carbon emissions due to choosing a given strategy at a given time
@@ -18,7 +19,7 @@ def emissions(strategy,start_time,data):
     co2 = 0
     # determine end time based on service time and max possible time
     end_time = start_time + data["s_time"][strategy]
-    max_time = len(data["time"])
+    max_time = len(data["time"])-1
     if (end_time > max_time):
         end_time = max_time
 
@@ -55,7 +56,7 @@ class SolutionCollector(cp_model.CpSolverSolutionCallback):
         return self.__solution_list
 
 # function to compute the precision of a given solution
-def precision(solution,data):
+def sol_precision(solution,data):
     # weighted average of precisions
     precision = 0
     total_queries = 0
@@ -64,6 +65,13 @@ def precision(solution,data):
         precision += data["s_precision"][s] * data["rate"][t]
         total_queries += data["rate"][t]
     return precision/total_queries
+
+# function to compute the emissions of a given solution
+def sol_emission(solution,data):
+    e = 0
+    for t in data["time"]:
+        e += emissions(solution[t],t,data)
+    return e
 
 def main():
     # get input data
@@ -107,7 +115,7 @@ def main():
                         model.AddImplication(and_assignment,assignment[(s1,t1)])
                         model.AddImplication(and_assignment,assignment[(s2,t2)])
                         # add implication of and_assignment on carbon
-                        model.AddImplication(and_assignment,data["carbon"][t1] > data["carbon"][t2])
+                        model.AddImplication(and_assignment,data["carbon"][t1] < data["carbon"][t2])
 
 
     # objective: minimize emission
@@ -122,26 +130,33 @@ def main():
     # find all possible solutions for the modelled problem
     solver = cp_model.CpSolver()
     solution_collector = SolutionCollector(assignment,data)
-    status = solver.Solve(model,solution_collector)
+    s_time = time.time()
+    status = solver.SolveWithSolutionCallback(model,solution_collector)
+    e_time = time.time()
 
     # check if problem can be solved
     if status != cp_model.OPTIMAL:
         print("No optimal solution found!")
         return 
     
+    # DEBUG: print all found solutions
+    for solution in solution_collector.get_solutions():
+        print(solution)
+
     # pick the first solution with the highest precision
     max_precision = -1
     best_solution = None
     solutions = solution_collector.get_solutions() # array with indexes denoting times and values denoting chosen strategies
     for solution in solutions:
-        p = precision(solution,data)
+        p = sol_precision(solution,data)
         if p > max_precision:
             best_solution = solution
             max_precision = p 
 
     print("Solution:", best_solution)
-    print("Precision:", precision(best_solution,data))
-
+    print("Emissions:", sol_emission(best_solution,data))
+    print("Precision:", sol_precision(best_solution,data))
+    print("Execution time:", (e_time - s_time))
     # TODO: Extract thresholds by analysing picked solution
 
 main()
