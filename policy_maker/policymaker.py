@@ -1,5 +1,4 @@
 from ortools.sat.python import cp_model
-import time
 
 # function to import input data
 def import_data():
@@ -11,7 +10,7 @@ def import_data():
     data["time"] = [0,1,2,3,4,5,6,7,8,9,10]
     data["rate"] = [3,4,5,2,1,6,7,2,5,6,7]
     data["carbon"] = [100,1000,5,200,1000,100,67,567,2,800,5]
-    data["precision_threshold"] = 100
+    data["precision_threshold"] = 88
     return data
 
 # function to compute the carbon emissions due to choosing a given strategy at a given time
@@ -130,9 +129,8 @@ def main():
     # find all possible solutions for the modelled problem
     solver = cp_model.CpSolver()
     solution_collector = SolutionCollector(assignment,data)
-    s_time = time.time()
-    status = solver.SolveWithSolutionCallback(model,solution_collector)
-    e_time = time.time()
+    status = solver.Solve(model,solution_collector)
+    elapsed_time = solver.UserTime()
 
     # check if problem can be solved
     if status != cp_model.OPTIMAL:
@@ -141,22 +139,28 @@ def main():
     
     # DEBUG: print all found solutions
     for solution in solution_collector.get_solutions():
-        print(solution)
+         print(solution)
+    print("Execution time:", elapsed_time)
 
-    # pick the first solution with the highest precision
-    max_precision = -1
-    best_solution = None
+    # pick the solution with lowest emissions and highest precision
+    # (with post-processing to escape local minima of emissions)
     solutions = solution_collector.get_solutions() # array with indexes denoting times and values denoting chosen strategies
+    best_solution = solutions[0]
+    best_emissions = sol_emission(best_solution,data)
+    best_precision = sol_precision(best_solution,data)
     for solution in solutions:
-        p = sol_precision(solution,data)
-        if p > max_precision:
+        if sol_emission(solution,data) < best_emissions:
             best_solution = solution
-            max_precision = p 
+        elif sol_emission(solution,data) == best_emissions and sol_precision(solution,data) > best_precision:
+            best_solution = solution
+        best_emissions = sol_emission(best_solution,data)
+        best_precision = sol_precision(best_solution,data)
+           
 
+    # DEBUG: print best solution data
     print("Solution:", best_solution)
     print("Emissions:", sol_emission(best_solution,data))
     print("Precision:", sol_precision(best_solution,data))
-    print("Execution time:", (e_time - s_time))
     # TODO: Extract thresholds by analysing picked solution
 
 main()
