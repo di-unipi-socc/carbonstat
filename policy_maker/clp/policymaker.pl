@@ -2,31 +2,21 @@
 :- consult('examples/example2.pl').
 
 %%% Main %%%
-go(Solution, DesiredP, Thresholds) :-
+go(DesiredP, Best) :-
     init(Strategies, Times), minPrecision(DesiredP, MinP),
     Strategies ins 0..2, % strategies are numbered from 0 (hp) to 2 (lp)
-    time(optimal(Times, MinP, Solution)),
-    thresholds(Solution, Thresholds).
+    P #>= MinP, % precision is at least MinP
+    time(findall((E,P,S), solution(Times, S, E, P), Sols)),
+    sort(Sols, [Best|_]), write(Best), nl.
 
-optimal(Times, MinP, Solution) :-
-    findall((E,P,Strategies), solution(Times, Strategies, E, MinP, P), Solutions), 
-    sort(Solutions, [Solution|_]).
-
-solution(Times, Strategies, E, MinP, P) :- 
-    constrain(P,MinP),               % constrain the precision P to be at least MinP
-    assign(Times, Strategies, E, P). % determine a valid sequence of strategies with E emissions and P precision
-  
-constrain(P,MinP) :- P #>= MinP.
-    
-assign(Times, Strategies, E, P) :-
-    maplist(selectStrategy, Times, Strategies, Emissions, Precisions), 
+solution(Times, Strategies, Emissions, Precision) :-
+    maplist(selectStrategy, Times, Strategies, Precisions), 
     thresholdCoherent(Times, Strategies),
-    sum(Precisions, #=, P), sumlist(Emissions, E).
+    sum(Precisions,#=,Precision),
+    emissions(Strategies, Emissions).
 
-selectStrategy(Time, Strategy, E, P) :-
-    strategy(Strategy, Duration, _), requestRate(Time, R), maxTime(MaxTime),
-    (Time + Duration =< MaxTime -> EndTime is Time + Duration; EndTime is MaxTime),
-    emissions(Time, EndTime, Emissions), E is R * Emissions, 
+selectStrategy(Time, Strategy, P) :-
+    strategy(Strategy, _, _), requestRate(Time, R), 
     precision(R, Strategy, P).
 
 thresholdCoherent(Times, Strategies) :-
@@ -37,19 +27,20 @@ thresholdCoherent(Times, Strategies) :-
             C1 >= C2
         ).
 
-emissions(StartTime, EndTime, Emissions) :-
-    findall(C, (carbonIntensity(I,C), I >= StartTime, I < EndTime), Cs), sumlist(Cs, Emissions).
-
 precision(R, Strategy, Precision) :- strategy(Strategy, _, P), Precision is R * P.
 
-thresholds(Solution, Thresholds) :- 
-    Solution = (_,_,Strategies),
-    findall((S,T), threshold(T, S, Strategies), Thresholds).
-    
-threshold(T, S, Strategies) :-
-    strategy(S, _, _), 
-    findall(C, (carbonIntensity(I,C), nth1(I, Strategies, S)), Cs),
-    min_list(Cs, T1), max_list(Cs, T2), T = <->(T1,T2).
+emissions(Solution, TotalEmissions) :-
+    emissions(Solution, 1, Emissions), sumlist(Emissions, TotalEmissions).
+
+emissions([S|Ss], I, [E|Es]) :-
+    strategy(S, Duration, _), requestRate(I, R), maxTime(MaxTime),
+    (I + Duration =< MaxTime -> EndTime is I + Duration; EndTime is MaxTime),
+    emitted(I, EndTime, Emissions), E is R * Emissions,
+    NewI is I + 1, emissions(Ss, NewI, Es).
+emissions([], _, []).
+
+emitted(StartTime, EndTime, Emissions) :-
+    findall(C, (carbonIntensity(I,C), I >= StartTime, I < EndTime), Cs), sumlist(Cs, Emissions).
 
 %%% Utils %%%
 init(Strategies, Times) :- maxTime(M), initLists(M, Strategies, Ts), reverse(Ts,Times).
