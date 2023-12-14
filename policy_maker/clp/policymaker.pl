@@ -13,8 +13,8 @@ optimal(Times, MinP, Solution) :-
     sort(Solutions, [Solution|_]).
 
 solution(Times, Strategies, E, MinP, P) :- 
-    assign(Times, Strategies, E, P), % determine a valid sequence of strategies with E emissions and P precision
-    constrain(P,MinP).               % constrain the precision P to be at least MinP
+    constrain(P,MinP),               % constrain the precision P to be at least MinP
+    assign(Times, Strategies, E, P). % determine a valid sequence of strategies with E emissions and P precision
   
 constrain(P,MinP) :- P #>= MinP.
     
