@@ -2,16 +2,6 @@
 :- consult('examples/example2.pl').
 
 %%% Main %%%
-
-thresholds(Solution, Thresholds) :- 
-    Solution = (_,_,Strategies),
-    findall((S,T), threshold(T, S, Strategies), Thresholds).
-    
-threshold(T, S, Strategies) :-
-    strategy(S, _, _), 
-    findall(C, (carbonIntensity(I,C), nth1(I, Strategies, S)), Cs),
-    min_list(Cs, T1), max_list(Cs, T2), T = <->(T1,T2).
-
 go(Solution, DesiredP, Thresholds) :-
     init(Strategies, Times), minPrecision(DesiredP, MinP),
     Strategies ins 0..2, % strategies are numbered from 0 (hp) to 2 (lp)
@@ -51,6 +41,15 @@ emissions(StartTime, EndTime, Emissions) :-
     findall(C, (carbonIntensity(I,C), I >= StartTime, I < EndTime), Cs), sumlist(Cs, Emissions).
 
 precision(R, Strategy, Precision) :- strategy(Strategy, _, P), Precision is R * P.
+
+thresholds(Solution, Thresholds) :- 
+    Solution = (_,_,Strategies),
+    findall((S,T), threshold(T, S, Strategies), Thresholds).
+    
+threshold(T, S, Strategies) :-
+    strategy(S, _, _), 
+    findall(C, (carbonIntensity(I,C), nth1(I, Strategies, S)), Cs),
+    min_list(Cs, T1), max_list(Cs, T2), T = <->(T1,T2).
 
 %%% Utils %%%
 init(Strategies, Times) :- maxTime(M), initLists(M, Strategies, Ts), reverse(Ts,Times).
