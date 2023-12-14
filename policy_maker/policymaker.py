@@ -142,4 +142,6 @@ def main():
     print("Solution:", best_solution)
     print("Precision:", precision(best_solution,data))
 
+    # TODO: Extract thresholds by analysing picked solution
+
 main()
