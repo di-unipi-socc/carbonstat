@@ -1,5 +1,5 @@
 :- use_module(library(clpfd)).
-:- consult('example2.pl').
+:- consult('examples/example2.pl').
 
 %%% Main %%%
 
