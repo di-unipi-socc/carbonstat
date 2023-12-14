@@ -4,11 +4,11 @@
 
 %%% Main %%%
 go(DesiredP, (EF,PF,SF)) :-
-    init(Strategies, Times), minPrecision(DesiredP, MinP,TotReqs),
-    Strategies ins 0..2, % strategies are numbered from 0 (hp) to 2 (lp)
+    init(S, Times), minPrecision(DesiredP, MinP,TotReqs),
+    S ins 0..2, % strategies are numbered from 0 (hp) to 2 (lp)
     P #>= MinP,          % precision is at least MinP
     time(findall((E,P,S), solution(Times, S, E, P), Sols)),
-    sort(Sols, [(EF,PI,SF)|_]), PF is PI / TotReqs. % sort solutions by increasing emissions, take first one
+    sort(Sols, [(EF,PI,SF)|_]), PF is PI / TotReqs. % sort solutions by increasing emissions, take first
 
 solution(Times, Strategies, Emissions, Precision) :-
     maplist(selectStrategy, Times, Strategies, Precisions), 
