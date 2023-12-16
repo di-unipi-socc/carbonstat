@@ -1,4 +1,3 @@
-
 % assign a strategy to each time slot
 1 {assign(T,S) : strategy(S)} 1 :- time(T), reqs(T,R).
 
