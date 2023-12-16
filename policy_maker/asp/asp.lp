@@ -38,7 +38,7 @@ carbon(11, 5).
 1 {assign(T,S) : strategy(S)} 1 :- time(T), reqs(T,R).
 
 % throw away models where strategies are used inconsistently or precision is too low
-:- assign(T1,S1), assign(T2,S2), S1 < S2, carbon(T1,C1), carbon(T2,C2), C1 > C2.
+:- assign(T1,S1), assign(T2,S2), T1 != T2, S1 < S2, carbon(T1,C1), carbon(T2,C2), C1 > C2.
 :- precision(Pr), desiredPrecision(Goal), totReqs(Tot), Pr < Tot * Goal.
 
 % compute cost and precision
