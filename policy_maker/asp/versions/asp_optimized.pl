@@ -1,5 +1,5 @@
 % assign a strategy to each time slot
-1 {assign(T,S) : strategy(S)} 1 :- time(T), reqs(T,R).
+1 {assign(T,S) : strategy(S)} 1 :- time(T).
 
 % throw away models where strategies are used inconsistently or precision is too low
 :- assign(T1,S1), assign(T2,S2), T1 != T2, S1 < S2, carbon(T1,C1), carbon(T2,C2), C1 > C2.
