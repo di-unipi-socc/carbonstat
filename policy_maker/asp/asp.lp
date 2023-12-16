@@ -4,7 +4,7 @@ strategy(0..2).
 duration(1..100).
 
 maxTime(11).
-desiredPrecision(88).
+desiredPrecision(100).
 
 strategy(0, 1, 80).
 strategy(1, 2, 90).
@@ -47,15 +47,14 @@ precision(Pr) :- Pr = #sum{ RP, T :  RP = R * P, reqs(T,R), strategy(S,_,P), ass
 totReqs(Tot) :- Tot = #sum{ R, T : reqs(T,R) }.
 
 emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,D,TF), strategy(S,D,_), assign(TI,S) }, time(TI).
-totEmissions(TotE) :- TotE = #sum{ E, T : emissions(E,T) }, time(T).
 
 finalTime(T,D,TF) :- maxTime(Max), time(T), duration(D), T + D - 1 <= Max, TF = T + D - 1, time(TF).
 finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
-#minimize { E : totEmissions(E) }.
+#minimize { E : emissions(E,T) }.
 
 #show.
 #show overallPrecision(Pr) : precision(P), totReqs(R), Pr = P/R.
-#show totEmissions(E) : totEmissions(E).
+#show emissions(E) : emissions(E,T).
 #show assign(T,S) : time(T), assign(T,S), strategy(S).
 
