@@ -16,7 +16,6 @@ totEmissions(TotE) :- TotE = #sum{ E, T : emissions(E,T) }, time(T).
 finalTime(T,D,TF) :- maxTime(Max), time(T), duration(D), T + D - 1 <= Max, TF = T + D - 1, time(TF).
 finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
-#maximize { Pr : precision(Pr) }.
 #minimize { E : totEmissions(E) }.
 
 #show.

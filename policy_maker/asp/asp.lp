@@ -4,7 +4,7 @@ strategy(0..2).
 duration(1..100).
 
 maxTime(11).
-desiredPrecision(100).
+desiredPrecision(88).
 
 strategy(0, 1, 80).
 strategy(1, 2, 90).
@@ -52,7 +52,6 @@ totEmissions(TotE) :- TotE = #sum{ E, T : emissions(E,T) }, time(T).
 finalTime(T,D,TF) :- maxTime(Max), time(T), duration(D), T + D - 1 <= Max, TF = T + D - 1, time(TF).
 finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
-#maximize { Pr : precision(Pr) }.
 #minimize { E : totEmissions(E) }.
 
 #show.
