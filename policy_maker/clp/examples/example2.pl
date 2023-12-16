@@ -1,9 +1,9 @@
 maxTime(11).
 
 % strategy(Id, Duration, Precision)
-strategy(0, 3, 100).
+strategy(0, 1, 80).
 strategy(1, 2, 90).
-strategy(2, 1, 80).
+strategy(2, 3, 100).
 
 requestRate(1, 3).
 requestRate(2, 4).
@@ -16,7 +16,6 @@ requestRate(8, 2).
 requestRate(9, 5).
 requestRate(10, 6).
 requestRate(11, 7). 
-
 
 carbonIntensity(1, 100).
 carbonIntensity(2, 1000).
