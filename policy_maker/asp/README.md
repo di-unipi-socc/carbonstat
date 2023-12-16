@@ -39,14 +39,14 @@ meaning that at time `T` strategy `S` shall be used.
 
 To try one of the examples in the `examples` folder, simply issue:
 
-```bash
+```sh
 clingo asp_policymaker.lp examples/example<ID>.lp 0
 ```
 
 For instance, running `example2.pl` will output the following optimal assignment (associated to an estimate of 20915 gCO2-eq carbon emissions):
 
-```
-clingo asp_policymaker.lp examples/example2.lp 0
+```sh
+$ clingo asp_policymaker.lp examples/example2.lp 0
 clingo version 5.5.0
 Reading from asp_policymaker.lp ...
 Solving...
