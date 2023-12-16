@@ -14,7 +14,7 @@ finalTime(T,D,TF) :- maxTime(Max), time(T), duration(D), T + D - 1 <= Max, TF = 
 finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
 % minimises the sum of carbon emissions through a weak constraint
-:~ carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,D,TF), strategy(S,D,_), assign(TI,S). [C*R@2,TI,S]
+:~ carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,D,TF), strategy(S,D,_), assign(TI,S). [C*R@1,TI,S]
 
 #show.
 #show overallPrecision(Pr) : precision(P), totReqs(R), Pr = P/R.

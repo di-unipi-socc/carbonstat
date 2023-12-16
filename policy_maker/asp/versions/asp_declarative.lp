@@ -3,7 +3,7 @@
 
 % throw away models where strategies are used inconsistently or precision is too low
 :- assign(T1,S1), assign(T2,S2), T1 != T2, S1 < S2, carbon(T1,C1), carbon(T2,C2), C1 > C2.
-:- precision(Pr), desiredPrecision(Goal), totReqs(Tot), Pr =< Tot * Goal.
+:- precision(Pr), desiredPrecision(Goal), totReqs(Tot), Pr < Tot * Goal.
 
 % compute cost and precision
 precision(Pr) :- Pr = #sum{ RP, T :  RP = R * P, reqs(T,R), strategy(S,_,P), assign(T,S) }.
