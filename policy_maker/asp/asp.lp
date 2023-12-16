@@ -4,7 +4,7 @@ strategy(0..2).
 duration(1..100).
 
 maxTime(11).
-desiredPrecision(100).
+desiredPrecision(95).
 
 strategy(0, 1, 80).
 strategy(1, 2, 90).
@@ -53,8 +53,7 @@ finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
 #minimize { E : emissions(E,T) }.
 
-#show.
 #show overallPrecision(Pr) : precision(P), totReqs(R), Pr = P/R.
-#show emissions(E) : emissions(E,T).
+%#show emissions(T,E) : emissions(E,T).
 #show assign(T,S) : time(T), assign(T,S), strategy(S).
 

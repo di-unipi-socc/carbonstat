@@ -16,7 +16,5 @@ finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
 #minimize { E : emissions(E,T) }.
 
-#show.
 #show overallPrecision(Pr) : precision(P), totReqs(R), Pr = P/R.
-#show emissions(E) : emissions(E,T).
 #show assign(T,S) : time(T), assign(T,S), strategy(S).
