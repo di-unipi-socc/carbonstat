@@ -1,10 +1,10 @@
 
 time(1..11).
 strategy(0..2).
-duration(1..100).
+duration(1..3).
 
 maxTime(11).
-desiredPrecision(95).
+desiredPrecision(88).
 
 strategy(0, 1, 80).
 strategy(1, 2, 90).
@@ -34,7 +34,6 @@ carbon(9, 2).
 carbon(10, 800).
 carbon(11, 5).
 
-
 % assign a strategy to each time slot
 1 {assign(T,S) : strategy(S)} 1 :- time(T), reqs(T,R).
 
@@ -55,6 +54,4 @@ finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
 #show.
 #show overallPrecision(Pr) : precision(P), totReqs(R), Pr = P/R.
-% #show emissions(T,E) : emissions(E,T).
-#show assign(T,S) : time(T), assign(T,S), strategy(S).
-
+#show assign(T,S,C) : time(T), assign(T,S), strategy(S), carbon(T,C).
