@@ -9,9 +9,9 @@
 precision(Pr) :- Pr = #sum{ RP, T :  RP = R * P, reqs(T,R), strategy(S,_,P), assign(T,S) }.
 totReqs(Tot) :- Tot = #sum{ R, T : reqs(T,R) }.
 
-emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,D,TF), strategy(S,D,_), assign(TI,S) }, time(TI).
+emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,S,TF), assign(TI,S) }, time(TI).
 
-finalTime(T,D,@final_time(T,D,Max)) :- time(T), duration(D), maxTime(Max).
+finalTime(T,S,@final_time(T,D,Max)) :- strategy(S,D,_), time(T), duration(D), maxTime(Max).
 
 #minimize { E : emissions(E,T) }.
 
