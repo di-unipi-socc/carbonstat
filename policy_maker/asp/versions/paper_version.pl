@@ -18,8 +18,7 @@ end(T,D,TF) :- duration(D), maxTime(Max), time(T), TF = T + D - 1, TF <= Max.
 end(T,D,Max) :- duration(D), maxTime(Max), time(T), T + D - 1 > Max.
 
 % minimise overall emissions
-#minimize { E@2 : emissions(E,T) }.
-#maximize { Pr/R@1 : precision(Pr), totReqs(R) }.
+#minimize { E : emissions(E,T) }.
 
 #show.
 #show overallPrecision(Pr) : precision(P), totReqs(R), Pr = P/R.

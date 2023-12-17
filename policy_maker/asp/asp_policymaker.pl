@@ -15,7 +15,7 @@ emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(T,R), TI <= 
 endtime(T,D,TF) :- maxTime(Max), time(T), duration(D), TF = T + D - 1, TF <= Max.
 endtime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
-% minimise overall emissions
+% minimise overall emissions and maximise overall precision
 #minimize { E@2 : emissions(E,T) }.
 #maximize { Pr/R@1 : precision(Pr), totReqs(R) }.
 
