@@ -3,7 +3,7 @@ time(1..11).
 strategy(0..2).
 
 maxTime(11).
-desiredPrecision(100).
+desiredPrecision(88).
 
 strategy(0, 1, 80).
 strategy(1, 2, 90).
