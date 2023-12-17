@@ -5,15 +5,17 @@
 :- assign(T1,S1), assign(T2,S2), T1 != T2, S1 < S2, carbon(T1,C1), carbon(T2,C2), C1 > C2.
 :- precision(Pr), desiredPrecision(Goal), totReqs(Tot), Pr < Tot * Goal.
 
-% compute precision and emissions
+% compute precision
 precision(Pr) :- Pr = #sum{ RP, T :  RP = R * P, reqs(T,R), strategy(S,_,P), assign(T,S) }.
 totReqs(Tot) :- Tot = #sum{ R, T : reqs(T,R) }.
 
+% compute emissions for each time slot TI
 emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,D,TF), strategy(S,D,_), assign(TI,S) }, time(TI).
 
 finalTime(T,D,TF) :- maxTime(Max), time(T), duration(D), TF = T + D - 1, TF <= Max.
 finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
 
+% minimise overall emissions
 #minimize { E : emissions(E,T) }.
 
 #show.

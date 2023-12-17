@@ -10,10 +10,10 @@ precision(Pr) :- Pr = #sum{ RP, T :  RP = R * P, reqs(T,R), strategy(S,_,P), ass
 totReqs(Tot) :- Tot = #sum{ R, T : reqs(T,R) }.
 
 % compute emissions for each time slot TI
-emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,D,TF), strategy(S,D,_), assign(TI,S) }, time(TI).
+emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(T,R), TI <= T, T <= TF, finalTime(TI,S,TF), assign(TI,S) }, time(TI).
 
-finalTime(T,D,TF) :- maxTime(Max), time(T), duration(D), TF = T + D - 1, TF <= Max.
-finalTime(T,D,Max) :- maxTime(Max), time(T), duration(D), T + D - 1 > Max.
+finalTime(T,S,TF) :- strategy(S,D,_), maxTime(Max), time(T), TF = T + D - 1, TF <= Max.
+finalTime(T,S,Max) :- strategy(S,D,_), maxTime(Max), time(T), T + D - 1 > Max.
 
 % minimise overall emissions
 #minimize { E : emissions(E,T) }.
