@@ -1,9 +1,9 @@
 
-time(1..24).
+time(1..30).
 strategy(0..2).
 duration(1..3).
 
-maxTime(24).
+maxTime(30).
 desiredPrecision(90).
 
 strategy(0, 1, 80).
@@ -34,6 +34,12 @@ reqs(21, 50).
 reqs(22, 100).
 reqs(23, 200).
 reqs(24, 10).
+reqs(25, 20).
+reqs(26, 30).
+reqs(27, 40).
+reqs(28, 50).
+reqs(29, 100).
+reqs(30, 200).
 
 carbon(1, 100).
 carbon(2, 1000).
@@ -59,3 +65,9 @@ carbon(21, 800).
 carbon(22, 5).
 carbon(23, 100).
 carbon(24, 1000).
+carbon(25, 5).
+carbon(26, 200).
+carbon(27, 1000).
+carbon(28, 387).
+carbon(29, 67).
+carbon(30, 400).
