@@ -11,10 +11,10 @@ sumOfPrecisions(Ps) :- Ps = #sum{ RP, T : reqs(T,R), adopted(T,S), strategy(S,_,
 totalReqs(Rs)       :- Rs = #sum{ R , T : reqs(T,R) }.
 
 % compute emissions for each time slot
-emissions(E,TI) :-  E = #sum{ CR, T : TI <= T, T <= TI + D - 1, T <= TL, carbon(T,C), CR = C * RI}, reqs(TI,RI), adopted(TI,S), timeSlot(TI), strategy(S,D,_),lastTimeSlot(TL).
+emissions(E,TI) :- E = #sum{ CR, T : TI <= T, T <= TI + D - 1, T <= TL, carbon(T,C), CR = C * RI}, reqs(TI,RI), adopted(TI,S), timeSlot(TI), strategy(S,D,_),lastTimeSlot(TL).
 
 #minimize { E@2,TI : emissions(E,TI) }.
-#minimize { P/R@1 : sumOfPrecisions(P), totalReqs(R) }.
+#maximize { P/R@1 : sumOfPrecisions(P), totalReqs(R) }.
 
 #show.
 #show achievedPrecision(Pr) : sumOfPrecisions(P), totalReqs(R), Pr = P/R.
