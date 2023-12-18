@@ -4,13 +4,7 @@ This version of the policymaker employs Answer Set Programming. It relies on the
 
 ## Knowledge Representation
 
-Users just need to specify ground domains for:
-
-- the considered time instants, i.e.  ` time(MinTime..MaxTime).`, 
-- the number of strategies they consider, i.e.  `strategy(0..2).`, and 
-- the time duration of the considered strategies, `duration(1..3).`.
-
-Also, a fact `maxTime(MaxTime)` is needed.
+Users just need to specify ground domains for the considered time instants, i.e.  ` timeSlot(1..TL).` and a fact `lastTimeSlot(TL)` is needed.
 
 Then, users can specify the characteristics of their strategies via facts like
 
@@ -30,10 +24,10 @@ carbon(T,CarbonIntensity).
 Strategy assignments are denoted via facts of the form
 
 ```prolog
-assign(T,S).
+adopted(T,S).
 ```
 
-meaning that at time `T` strategy `S` shall be used.
+meaning that strategy `S` shall be used at time `T`.
 
 ## How to
 
@@ -48,21 +42,24 @@ For instance, running `example2.pl` will output the following optimal assignment
 ```sh
 $ clingo asp_policymaker.pl examples/example2.pl 0
 clingo version 5.5.0
-Reading from asp_policymaker.pl ...
+Reading from versions/e.pl ...
 Solving...
 Answer: 1
-assign(1,1) assign(3,1) assign(4,1) assign(5,1) assign(6,1) assign(7,1) assign(8,1) assign(9,1) assign(10,1) assign(11,1) assign(2,2) overallPrecision(90)
-Optimization: 25646
+policyAttimeSlot(9,0) policyAttimeSlot(1,1) policyAttimeSlot(2,1) policyAttimeSlot(3,1) policyAttimeSlot(4,1) policyAttimeSlot(5,1) policyAttimeSlot(6,1) policyAttimeSlot(7,1) policyAttimeSlot(8,1) policyAttimeSlot(10,1) policyAttimeSlot(11,1) achievedPrecision(88)
+Optimization: 23298 88
 Answer: 2
-assign(3,0) assign(9,0) assign(1,1) assign(4,1) assign(6,1) assign(7,1) assign(8,1) assign(11,1) assign(2,2) assign(5,2) assign(10,2) overallPrecision(90)
-Optimization: 20915
+policyAttimeSlot(3,0) policyAttimeSlot(9,0) policyAttimeSlot(11,0) policyAttimeSlot(1,1) policyAttimeSlot(4,1) policyAttimeSlot(6,1) policyAttimeSlot(7,1) policyAttimeSlot(8,1) policyAttimeSlot(2,2) policyAttimeSlot(5,2) policyAttimeSlot(10,2) achievedPrecision(88)
+Optimization: 23165 88
+Answer: 3
+policyAttimeSlot(3,0) policyAttimeSlot(7,0) policyAttimeSlot(9,0) policyAttimeSlot(11,0) policyAttimeSlot(1,1) policyAttimeSlot(6,1) policyAttimeSlot(2,2) policyAttimeSlot(4,2) policyAttimeSlot(5,2) policyAttimeSlot(8,2) policyAttimeSlot(10,2) achievedPrecision(88)
+Optimization: 20996 88
 OPTIMUM FOUND
 
-Models       : 2
+Models       : 3
   Optimum    : yes
-Optimization : 20915
+Optimization : 20996 88
 Calls        : 1
-Time         : 0.218s (Solving: 0.04s 1st Model: 0.01s Unsat: 0.03s)
-CPU Time     : 0.206s
+Time         : 0.121s (Solving: 0.01s 1st Model: 0.00s Unsat: 0.00s)
+CPU Time     : 0.121s
 ```
 
