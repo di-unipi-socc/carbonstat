@@ -1,6 +1,7 @@
-timeSlot(1..11).
-desiredPrecision(88).
-lastTimeSlot(11).
+
+timeSlot(1..10).
+desiredPrecision(30).
+lastTimeSlot(10).
 
 strategy(0, 1, 80).
 strategy(1, 2, 90).
@@ -16,7 +17,6 @@ reqs(7, 7).
 reqs(8, 2).
 reqs(9, 5).
 reqs(10, 6).
-reqs(11, 7). 
 
 carbon(1, 100).
 carbon(2, 1000).
@@ -28,4 +28,3 @@ carbon(7, 67).
 carbon(8, 567).
 carbon(9, 2).
 carbon(10, 800).
-carbon(11, 5).

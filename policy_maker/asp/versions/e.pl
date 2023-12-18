@@ -19,3 +19,7 @@ emissions(E,TI) :-  E = #sum{ CR, T : TI <= T, T <= TI + D - 1, T <= TL, carbon(
 #show.
 #show achievedPrecision(Pr) : sumOfPrecisions(P), totalReqs(R), Pr = P/R.
 #show policyAttimeSlot(T,S) : timeSlot(T), adopted(T,S).
+
+
+% tf(TI,S,TI+D-1) :- lastTimeSlot(TL), timeSlot(TI), timeSlot(TI+D-1), strategy(S,D,_).
+% tf(TL,S,TL) :- lastTimeSlot(TL), timeSlot(TL), strategy(S,_,_).

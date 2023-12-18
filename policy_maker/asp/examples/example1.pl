@@ -1,10 +1,6 @@
-
-time(1..30).
-strategy(0..2).
-duration(1..3).
-
-maxTime(30).
+timeSlot(1..30).
 desiredPrecision(90).
+lastTimeSlot(30).
 
 strategy(0, 1, 80).
 strategy(1, 2, 90).
