@@ -1,26 +1,25 @@
-% assign a strategy to each time slot
-1 {assign(T,S) : strategy(S,_,_)} 1 :- time(T).
+% Randomly choose adopted strategy for each time slot
+1 {adopted(T,S) : strategy(S,_,_)} 1 :- timeSlot(T).
 
-% throw away models where strategies are used inconsistently or precision is too low
-:- assign(T1,S1), assign(T2,S2), T1 != T2, S1 < S2, carbon(T1,C1), carbon(T2,C2), C1 > C2.
-:- precision(Pr), desiredPrecision(Goal), totReqs(Tot), Pr < Tot * Goal.
+% Discard models with incoherent strategies or insufficient precision
+:- adopted(T1,S1), adopted(T2,S2), carbon(T1,C1), carbon(T2,C2), T1 != T2, S1 < S2, C1 > C2. 
+:- adopted(T1,S1), adopted(T2,S2), carbon(T1,C), carbon(T2,C), T1 != T2, S1 != S2.   
 
-% compute precision
-precision(Pr) :- Pr = #sum{ RP, T :  RP = R * P, reqs(T,R), strategy(S,_,P), assign(T,S) }.
-totReqs(Tot) :- Tot = #sum{ R, T : reqs(T,R) }.
+:- desiredPrecision(DP), sumOfPrecisions(Ps), totalReqs(Rs), Ps < Rs * DP.
+% with
+sumOfPrecisions(Ps) :- Ps = #sum{ RP, T : reqs(T,R), adopted(T,S), strategy(S,_,P), RP = R * P }.
+totalReqs(Rs)       :- Rs = #sum{ R , T : reqs(T,R) }.
 
-% compute emissions for each time slot TI
-emissions(E,TI) :- E = #sum{ CR, T : CR = C * R,  carbon(T,C), reqs(TI,R), TI <= T, T <= TF, endtime(TI,S,TF), assign(TI,S) }, time(TI).
+% compute emissions for each time slot
+emissions(E,TI) :-  E = #sum{ CR, T : TI <= T, T <= TI + D - 1, T <= TL, carbon(T,C), CR = C * RI}, reqs(TI,RI), adopted(TI,S), timeSlot(TI), strategy(S,D,_),lastTimeSlot(TL).
 
-endtime(T,S,TF) :- strategy(S,D,_), end(T,D,TF).
-
-end(T,D,TF) :- duration(D), maxTime(Max), time(T), TF = T + D - 1, TF <= Max.
-end(T,D,Max) :- duration(D), maxTime(Max), time(T), T + D - 1 > Max.
-
-% minimise overall emissions
-#minimize { E@2 : emissions(E,T) }.
-#maximize { Pr/R@1 : precision(Pr), totReqs(R) }.
+#minimize { E@2,TI : emissions(E,TI) }.
+#minimize { P/R@1 : sumOfPrecisions(P), totalReqs(R) }.
 
 #show.
-#show overallPrecision(Pr) : precision(P), totReqs(R), Pr = P/R.
-#show assign(T,S,C) : time(T), assign(T,S), strategy(S,_,_), carbon(T,C).
+#show achievedPrecision(Pr) : sumOfPrecisions(P), totalReqs(R), Pr = P/R.
+#show policyAttimeSlot(T,S) : timeSlot(T), adopted(T,S).
+
+
+% tf(TI,S,TI+D-1) :- lastTimeSlot(TL), timeSlot(TI), timeSlot(TI+D-1), strategy(S,D,_).
+% tf(TL,S,TL) :- lastTimeSlot(TL), timeSlot(TL), strategy(S,_,_).
