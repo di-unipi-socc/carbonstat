@@ -13,8 +13,6 @@ totalReqs(Rs)       :- Rs = #sum{ R , T : reqs(T,R) }.
 emissions(E,TI) :-  E = #sum{ CR, T : TI <= T, T <= TI + D - 1, T <= TL, carbon(T,C), CR = C * RI}, 
                     reqs(TI,RI), adopted(TI,S), timeSlot(TI), strategy(S,D,_),lastTimeSlot(TL).
 
-%th(S, Th) :- adopted(T,S), carbon(T,Th), not(adopted(T2,S2), carbon(T2,Th2), Th2>Th, T2!=T).
-
 #minimize { E@2,TI : emissions(E,TI) }.
 #maximize { P/R@1 : sumOfPrecisions(P), totalReqs(R) }.
 
