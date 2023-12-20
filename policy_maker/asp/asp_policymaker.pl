@@ -21,5 +21,6 @@ emissions(E,TI) :-  E = #sum{ CR, T : TI <= T, T <= TI + D - 1, T <= TL, carbon(
 % #show policyAttimeSlot(T,S) : timeSlot(T), adopted(T,S).
 #show scr(T,S,C,R) : timeSlot(T), carbon(T,C), reqs(T,R), adopted(T,S).
 #show thresholds(S,MaxR,MaxC) : 
-    strategy(S,_,_), MaxR = #max{ R : reqs(T,R), adopted(T,S), timeSlot(T) },
-                     MaxC = #max{ C : carbon(T,C), adopted(T,S), timeSlot(T) }.
+    strategy(S,_,_), 
+        MaxR = #max{ R, T : reqs(T,R),  adopted(T,S), timeSlot(T)},
+        MaxC = #max{ C, T : carbon(T,C), adopted(T,S), timeSlot(T) }.
