@@ -19,6 +19,9 @@ emissions(E,TI) :-  E = #sum{ CR, T : TI <= T, T <= TI + D - 1, T <= TL, carbon(
 #maximize { P/R@1 : sumOfPrecisions(P), totalReqs(R) }.
 
 #show.
-#show achievedPrecision(Pr) : sumOfPrecisions(P), totalReqs(R), Pr = P/R.
-#show policyAttimeSlot(T,S) : timeSlot(T), adopted(T,S).
-#show crs(C,R,S) : timeSlot(T), carbon(T,C), reqs(T,R), adopted(T,S).
+% #show achievedPrecision(Pr) : sumOfPrecisions(P), totalReqs(R), Pr = P/R.
+% #show policyAttimeSlot(T,S) : timeSlot(T), adopted(T,S).
+#show scr(T,S,C,R) : timeSlot(T), carbon(T,C), reqs(T,R), adopted(T,S).
+#show thresholds(S,MaxR,MaxC) : 
+    strategy(S,_,_), MaxR = #max{ R : reqs(T,R), adopted(T,S), timeSlot(T) },
+                     MaxC = #max{ C : carbon(T,C), adopted(T,S), timeSlot(T) }.
