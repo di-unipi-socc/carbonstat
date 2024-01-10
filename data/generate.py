@@ -1,14 +1,14 @@
 import random
 
 # configuration for random number generation
-maxN = 10000
+maxN = 100000000
 rand = lambda min,max : random.SystemRandom().randint(min,max)
 size = 1000000
 
 # generate random numbers
 values = []
 for i in range(size):
-    if i%2 == 0:
+    if i%3 == 0:
         values.append(rand(1,round(maxN/4)))
     else:
         values.append(rand(round(3*maxN/4),maxN))

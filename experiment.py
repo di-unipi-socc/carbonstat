@@ -5,6 +5,8 @@ from time import sleep
 # function to update (ongoing) policy results
 def update(policyResult,getReply):
     policyResult["values"].append(float(getReply["value"]))
+    # get elapsed time
+    policyResult["time"] = float(getReply["elapsed"])
     # measure carbon emission considering carbon intensity, elapsed time, and power consumption
     carbonIntensity = float(getReply["carbon"])*1000 # mg of co2-eq/(kW*h)
     elapsedTime = float(getReply["elapsed"])/(3600*1000) # elapsed hours for computation (h)
@@ -34,16 +36,16 @@ def process(policyResult,referenceValue):
         policyResult["precision"] = 100
 
 # experiment configuration
-repetitions = 10
-queries = 1000
+repetitions = 1
+queries = 100 # TODO: make it variable
 carbonMock = { "start": "5", "step": "20", "limit": "1100"} # from (solar) 5g to (coal) 1100g of CO2-eq/kWh
 policies = [
     { "name": "carbon-unaware", "highPowerLimit": "2000", "mediumPowerLimit": "2100"},
-    { "name": "super-power-hungry", "highPowerLimit": "850", "mediumPowerLimit": "1000"}, 
-    { "name": "power-hungry", "highPowerLimit": "750", "mediumPowerLimit": "950"}, 
+    #{ "name": "super-power-hungry", "highPowerLimit": "850", "mediumPowerLimit": "1000"}, 
+    #{ "name": "power-hungry", "highPowerLimit": "750", "mediumPowerLimit": "950"}, 
     { "name": "balanced", "highPowerLimit": "350", "mediumPowerLimit": "750"}, 
-    { "name": "saving", "highPowerLimit": "150", "mediumPowerLimit": "350"}, 
-    { "name": "super-saving", "highPowerLimit": "100", "mediumPowerLimit": "250"}, 
+    #{ "name": "saving", "highPowerLimit": "150", "mediumPowerLimit": "350"}, 
+    #{ "name": "super-saving", "highPowerLimit": "100", "mediumPowerLimit": "250"}, 
 ]
 
 # clean result and log file (if any)
@@ -89,9 +91,9 @@ for i in range(repetitions):
         # send queries and collect results
         logFile.write("|  |- Sending queries...")
         ithResult[policyName] = {}
-        ithResult[policyName]["low"] = { "values": [], "carbon": 0 }
-        ithResult[policyName]["medium"] = { "values": [], "carbon": 0 }
-        ithResult[policyName]["high"] = { "values": [], "carbon": 0 }
+        ithResult[policyName]["low"] = { "values": [], "carbon": 0, "time": 0 }
+        ithResult[policyName]["medium"] = { "values": [], "carbon": 0, "time": 0  }
+        ithResult[policyName]["high"] = { "values": [], "carbon": 0, "time": 0  }
         for i in range(queries):
             getReply = get("http://127.0.0.1:50000/avg").json()
             if "LOW" in getReply["strategy"]:
@@ -123,13 +125,14 @@ for ithResult in iterations:
     for policy in ithResult:
         if policy not in overallResult: 
             overallResult[policy] = {}
-            overallResult[policy]["low"] = { "carbon": 0, "queries": 0, "precision": 0 }
-            overallResult[policy]["medium"] = { "carbon": 0, "queries": 0, "precision": 0 }
-            overallResult[policy]["high"] = { "carbon": 0, "queries": 0, "precision": 0 }
+            overallResult[policy]["low"] = { "carbon": 0, "queries": 0, "precision": 0, "time": 0 }
+            overallResult[policy]["medium"] = { "carbon": 0, "queries": 0, "precision": 0, "time": 0 }
+            overallResult[policy]["high"] = { "carbon": 0, "queries": 0, "precision": 0, "time": 0 }
         for flavour in ithResult[policy]:
             overallResult[policy][flavour]["carbon"] += ithResult[policy][flavour]["carbon"]
             overallResult[policy][flavour]["queries"] += ithResult[policy][flavour]["queries"]
             overallResult[policy][flavour]["precision"] += ithResult[policy][flavour]["precision"]
+            overallResult[policy][flavour]["time"] += ithResult[policy][flavour]["time"]
 
 for policy in overallResult:
     for flavour in overallResult[policy]:

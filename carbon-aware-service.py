@@ -54,7 +54,7 @@ with open("data/numbers.txt","r") as numbers:
     app.data = [] 
     for val in values:
         app.data.append(int(val))
-    random.shuffle(app.data)
+    # random.shuffle(app.data)
 
 # set service's context
 app.context = Context()
