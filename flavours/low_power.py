@@ -10,8 +10,8 @@ class LowPowerStrategy(CarbonAwareStrategy):
 
     def avg(data) -> float:
         sum = 0
-        # step set to consider 0.1% of the data
-        step = 1000
+        # step set to consider 5% of the data
+        step = 20
         # compute avg 
         count = 0
         size = len(data)

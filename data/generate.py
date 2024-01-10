@@ -8,7 +8,7 @@ size = 1000000
 # generate random numbers
 values = []
 for i in range(size):
-    if i%3 == 0:
+    if i%50 == 0:
         values.append(rand(1,round(maxN/4)))
     else:
         values.append(rand(round(3*maxN/4),maxN))
