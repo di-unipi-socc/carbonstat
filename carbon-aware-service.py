@@ -42,11 +42,11 @@ class Context:
     
     # getter for carbon-aware strategy
     def getCarbonAwareStrategy(self,high) -> CarbonAwareStrategy:
-        carbon = self.monitor.carbon()
-        requests = self.monitor.requests()
-        if high or (carbon <= self.high["maxCarbon"] and requests <= self.high["maxRequests"]):
+        self.carbon = self.monitor.carbon()
+        self.requests = self.monitor.requests()
+        if high or (self.carbon <= self.high["maxCarbon"] and self.requests <= self.high["maxRequests"]):
             return CarbonAwareStrategies.HighPower.value
-        elif carbon <= self.medium["maxCarbon"] and requests <= self.medium["maxRequests"]:
+        elif self.carbon <= self.medium["maxCarbon"] and self.requests <= self.medium["maxRequests"]:
             return CarbonAwareStrategies.MediumPower.value
         return CarbonAwareStrategies.LowPower.value
 
@@ -54,7 +54,7 @@ class Context:
 app = Flask(__name__)
 
 # app data
-with open("data/numbers.txt","r") as numbers:
+with open("data/numbers/numbers.txt","r") as numbers:
     values = numbers.read().split(",")
     app.data = [] 
     for val in values:
@@ -91,7 +91,7 @@ def avg():
     result["value"] = average
     result["elapsed"] = elapsed
     result["strategy"] = strategy.nop()
-    result["carbon"] = app.context.co2
+    result["carbon"] = app.context.carbon
     return jsonify(result)
 
 app.run(host='0.0.0.0',port=50000)

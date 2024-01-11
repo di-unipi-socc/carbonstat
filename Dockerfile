@@ -14,7 +14,7 @@ ADD flavours flavours
 
 # Add service's data
 ADD data data
-WORKDIR /cas/data
+WORKDIR /cas/data/numbers
 RUN python3 generate.py
 WORKDIR /cas
 
