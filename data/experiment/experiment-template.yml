@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  cas:
+    image: "carbon-aware-service"
+    container_name: "carbon-aware-service"
+    build: .
+    environment:
+      - CARBON_INTENSITY=$CARB
+      - REQUESTS=$REQS
+      - HIGH_POWER_LIMITS=$HP_CARB,$HP_REQS
+      - MEDIUM_POWER_LIMITS=$MP_CARB,$MP_REQS
+    ports:
+      - "50000:50000"
+    network_mode: bridge
