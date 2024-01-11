@@ -9,7 +9,7 @@ RUN pip3 install -r requirements.txt
 
 # Copy service's sources
 COPY carbon-aware-service.py .
-ADD carbon carbon
+ADD monitoring monitoring
 ADD flavours flavours
 
 # Add service's data

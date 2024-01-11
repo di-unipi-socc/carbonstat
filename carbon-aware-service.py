@@ -2,10 +2,9 @@ from datetime import datetime
 from enum import Enum
 from flask import Flask,request,jsonify
 from os import environ
-import random
 
 # Carbon intensity reader (mock)
-from carbon.reader_mock import CarbonIntensityReader
+from monitoring.mock import Monitor
 
 # ------ STRATEGIES ------
 # Import and enum carbon-aware strategies (aka. flavours)
@@ -28,22 +27,28 @@ class Context:
     
     # initializer
     def __init__(self):
-        self.co2 = None
-        self.highPowerLimit = float(environ["HIGHPOWER_LIMIT"])
-        self.mediumPowerLimit = float(environ["MEDIUMPOWER_LIMIT"])
-        startingCO2 = float(environ["STARTING_CO2"])
-        stepCO2 = float(environ["CO2_STEP"])
-        limitCO2 = float(environ["CO2_LIMIT"])
-        self.carbonIntensityReader = CarbonIntensityReader(startingCO2,stepCO2,limitCO2)
-     
-    def getCarbonAwareStrategy(self,green) -> CarbonAwareStrategy:
-        self.co2 = self.carbonIntensityReader.read()
-        if green:
-            if self.co2 > self.mediumPowerLimit:
-                return CarbonAwareStrategies.LowPower.value
-            elif self.co2 > self.highPowerLimit:
-                return CarbonAwareStrategies.MediumPower.value
-        return CarbonAwareStrategies.HighPower.value
+        # high power strategy limits
+        highLimits = environ["HIGH_POWER_LIMITS"].split(",")
+        self.high = {}
+        self.high["maxCarbon"] = int(highLimits[0])
+        self.high["maxRequests"] = int(highLimits[1])
+        # medium power strategy limits 
+        mediumLimits = environ["MEDIUM_POWER_LIMITS"].split(",")
+        self.medium = {}
+        self.medium["maxCarbon"] = int(mediumLimits[0])
+        self.medium["maxRequests"] = int(mediumLimits[1])
+        # connection to monitoring 
+        self.monitor = Monitor()
+    
+    # getter for carbon-aware strategy
+    def getCarbonAwareStrategy(self,high) -> CarbonAwareStrategy:
+        carbon = self.monitor.carbon()
+        requests = self.monitor.requests()
+        if high or (carbon <= self.high["maxCarbon"] and requests <= self.high["maxRequests"]):
+            return CarbonAwareStrategies.HighPower.value
+        elif carbon <= self.medium["maxCarbon"] and requests <= self.medium["maxRequests"]:
+            return CarbonAwareStrategies.MediumPower.value
+        return CarbonAwareStrategies.LowPower.value
 
 # ------ SERVICE ------
 app = Flask(__name__)
@@ -54,7 +59,6 @@ with open("data/numbers.txt","r") as numbers:
     app.data = [] 
     for val in values:
         app.data.append(int(val))
-    # random.shuffle(app.data)
 
 # set service's context
 app.context = Context()
@@ -62,13 +66,10 @@ app.context = Context()
 @app.route("/")
 def nop():
     # Parse params and check if forcing to not run approximated
-    greenParameter = request.args.get("green")
-    if greenParameter and greenParameter.lower() == "false":
-        green = False
-    else:
-        green = True
+    forceParameter = request.args.get("force")
+    force = forceParameter and (forceParameter.lower()=="true")
     # Get carbon-aware strategy
-    strategy = app.context.getCarbonAwareStrategy(green)
+    strategy = app.context.getCarbonAwareStrategy(force)
     # Invoke strategy with dynamic typing
     answer = strategy.nop() + "\n"
     return answer
@@ -76,13 +77,10 @@ def nop():
 @app.route("/avg")
 def avg():
     # Parse params and check if forcing to not run approximated
-    greenParameter = request.args.get("green")
-    if greenParameter and greenParameter.lower() == "false":
-        green = False
-    else:
-        green = True
+    forceParameter = request.args.get("force")
+    force = forceParameter and (forceParameter.lower()=="true")
     # Get carbon-aware strategy
-    strategy = app.context.getCarbonAwareStrategy(green)
+    strategy = app.context.getCarbonAwareStrategy(force)
     # Invoke strategy with dynamic typing (and measure running time)
     start = datetime.now()
     average = strategy.avg(app.data)
