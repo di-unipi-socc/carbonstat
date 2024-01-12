@@ -162,6 +162,7 @@ cython_debug/
 # experiment generated files
 experiment-deploy.yml
 results.*
+data/experiment/results*
 *numbers.txt
 log.txt
 *DS_Store

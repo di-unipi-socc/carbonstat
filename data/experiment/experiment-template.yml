@@ -4,7 +4,7 @@ services:
   cas:
     image: "carbon-aware-service"
     container_name: "carbon-aware-service"
-    build: .
+    build: ../..
     environment:
       - CARBON_INTENSITY=$CARB
       - REQUESTS=$REQS

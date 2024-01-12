@@ -8,7 +8,8 @@ from time import sleep
 # Config data
 iterations = 2
 csv_input_file = "csv/short_example.csv"
-csv_output_file = "results.csv"
+csv_output_file = "results_with_timestamps.csv"
+csv_results_file = "results.csv"
 
 power_consumption = 0.05 # worst-case power consumption of my laptop(kW) 
 
@@ -32,11 +33,12 @@ log = open("exp.log",mode="w",buffering=1)
 # ------------------------
 #   RUN
 # ------------------------
+log.write("* running experiments\n")
 # open input csv file
 csv_input = open(csv_input_file,mode="r")
 # open output csv file (policy,timestamp,carbon,min_precision,average_precision)
 csv_output = open(csv_output_file,mode="w",buffering=1)
-csv_output.write("policy,timestamp,requests,carbon_emissions,min_precision,average_precision")
+csv_output.write("policy,timestamp,requests,carbon_emissions,min_precision,avg_precision\n")
 # run queries for each timestamp
 for line in list(csv_input)[1:]:
     # get timestamp, carbon, and requests
@@ -68,8 +70,8 @@ for line in list(csv_input)[1:]:
             for i in range(iterations):
                 log.write("policy: " + policy["name"] + "\ttimestamp: " + str(timestamp) + "\titeration: " + str(i+1) + "\n")
 
-                # TODO: force re-build of image, to re-create dataset
-                # os.system("docker compose -f experiment-template.yml build --no-cache >> log.txt 2>> log.txt")
+                # force re-build of image, to re-create dataset
+                os.system("docker compose -f experiment-template.yml build --no-cache >> log.txt 2>> log.txt")
 
                 # deploy configured experiment (and wait for deployment to complete)
                 os.system("docker compose -f experiment-deploy.yml up -d >> log.txt 2>> log.txt")
@@ -99,24 +101,72 @@ for line in list(csv_input)[1:]:
                     if precision < min_precision:
                         min_precision = precision
                     ith_avg_precision += precision
-                ith_avg_precision = round(ith_avg_precision/requests,2) # requests are assumed to be > 0
+                ith_avg_precision = ith_avg_precision/requests # requests are assumed to be > 0
                 avg_precision += ith_avg_precision
 
                 # undeploy experiment
                 os.system("docker compose -f experiment-deploy.yml down 2>> log.txt")
 
             # write results on the output csv file
-            avg_precision = round(avg_precision/iterations,2)
-            csv_output.write(policy["name"] + "," + timestamp + "," + str(requests) + "," + str(total_carbon) + "," + str(min_precision) + "," + str(avg_precision) + "\n") 
+            avg_precision = avg_precision/iterations
+            csv_output.write(policy["name"] + "," + timestamp + "," + str(requests) + "," + str(total_carbon) + "," + str(round(min_precision,2)) + "," + str(round(avg_precision,2)) + "\n") 
+# close input & output csv files
+csv_input.close()
+csv_output.close()
 
 # ------------------------
 #   POST-PROCESS
 # ------------------------
-#TODO: aggregate results on csv file (policy,total_carbon,min_precision,average_precision)
+log.write("* post-processing results\n")
+# create object to store stats on each policy
+stats = {}
+for policy in policies: 
+    stats[policy["name"]] = {}
+    stats[policy["name"]]["carbon"] = 0
+    stats[policy["name"]]["min_precision"] = 100
+    stats[policy["name"]]["precisions"] = []
+
+# extract data from csv output file
+csv_output = open(csv_output_file,"r")
+for line in list(csv_output)[1:]:
+    # extract line data
+    data = line.split(",")
+    policy = data[0]
+    requests = int(data[2])
+    carbon = float(data[3])
+    min_precision = float(data[4])
+    avg_precision = float(data[5])
+    # update policy's overall carbon emissions
+    stats[policy]["carbon"] += carbon
+    #  update policy's overall min precision
+    if min_precision < stats[policy]["min_precision"]:
+        stats[policy]["min_precision"] = min_precision
+    # add [requests,avg_precision] to precisions (to later compute the policy's overall avg)
+    stats[policy]["precisions"].append({"requests": requests, "avg_precision": avg_precision})
+csv_output.close()
+
+# compute each policy's overall avg precision
+for policy in policies:
+    tot_requests = 0
+    avg_precision = 0
+    for rp in stats[policy["name"]]["precisions"]:
+        tot_requests += rp["requests"]
+        avg_precision += rp["avg_precision"]*rp["requests"]
+    stats[policy["name"]]["avg_precision"] = round(avg_precision/tot_requests,2)
+    stats[policy["name"]].pop("precisions",None)
+
+# write policy stats on csv
+csv_results = open(csv_results_file,"w")
+csv_results.write("policy,carbon_emissions,min_precision,avg_precision\n")
+for policy in policies:
+    csv_results.write(policy["name"] + ",")
+    csv_results.write(str(stats[policy["name"]]["carbon"]) + ",")
+    csv_results.write(str(stats[policy["name"]]["min_precision"]) + ",")
+    csv_results.write(str(stats[policy["name"]]["avg_precision"]) + "\n")
+csv_results.close()
 
 # ------------------------
 #   CLEAN
 # ------------------------
-csv_input.close()
-csv_output.close()
 log.close()
+os.system("rm log.txt")
