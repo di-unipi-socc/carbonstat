@@ -15,12 +15,12 @@ power_consumption = 0.05 # worst-case power consumption of my laptop(kW)
 
 
 # Considered policies 
-# (by assuming max_carbon=500 and max_reqs=1000)
+# (by assuming max_carbon=450 and max_reqs=1000)
 policies = [
     # always running full power
     { "name": "a_full", "high": "10000,10000", "medium": "10000,10000"},
     # naive partitioning (three equal-sized chunks per dimension)
-    { "name": "naive", "high": "170,333", "medium": "335,666"}, 
+    { "name": "naive", "high": "150,333", "medium": "300,666"}, 
     # computed with policymaker
     # { "name": "found", "high": ",", "medium": ","},
     # always running low power
