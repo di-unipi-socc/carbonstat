@@ -97,7 +97,7 @@ for line in list(csv_input)[1:]:
                     # measure carbon emission (considering carbon intensity, elapsed time, and power consumption)
                     carbon_intensity = float(response["carbon"])*1000 # mg of co2-eq/(kW*h)
                     elapsed_time = float(response["elapsed"])/(3600*1000) # elapsed hours for computation (h)
-                    total_carbon += carbon_intensity * power_consumption * elapsed_time
+                    total_carbon += round(carbon_intensity * power_consumption * elapsed_time,2)
                     # compute precision
                     deviation = abs(float(response["value"]) - correct_avg)
                     precision = 100 - round(deviation/correct_avg*100,2)
