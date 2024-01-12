@@ -6,21 +6,22 @@ from time import sleep
 #   CONFIG
 # ------------------------
 # Config data
+power_consumption = 0.05 # worst-case power consumption of my laptop(kW) 
+max_carbon = 450
+max_reqs = 1000
 iterations = 2
+
 csv_input_file = "csv/short_example.csv"
 csv_output_file = "results_with_timestamps.csv"
 csv_results_file = "results.csv"
 
-power_consumption = 0.05 # worst-case power consumption of my laptop(kW) 
-
-
 # Considered policies 
-# (by assuming max_carbon=450 and max_reqs=1000)
+# (by assuming max_carbon and max_reqs as above)
 policies = [
     # always running full power
     { "name": "a_full", "high": "10000,10000", "medium": "10000,10000"},
     # naive partitioning (three equal-sized chunks per dimension)
-    { "name": "naive", "high": "150,333", "medium": "300,666"}, 
+    { "name": "naive", "high": str(round(5+max_carbon/3)) + "," + str(round(max_reqs/3)), "medium": str(round(5+max_carbon*2/3)) + "," + str(round(max_reqs*2/3))}, 
     # computed with policymaker
     # { "name": "found", "high": ",", "medium": ","},
     # always running low power
