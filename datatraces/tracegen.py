@@ -7,7 +7,7 @@ import numpy as np
 
 
 # Specify the interval of days and the initial date
-days = 1
+days = 2
 init_date = '2023-01-01T00:00Z'
 ###################################################
 
@@ -54,7 +54,7 @@ def generate_events(l, half_hours):
     _, event_times, _ = generate_poisson_events(l, 8)
     return count_events(event_times, 8)
 
-def generate_event_trace(days, lambdas = [250, 500, 800, 500, 1000, 2000]):
+def generate_event_trace(days, lambdas = [250, 100, 500, 250, 500, 1000]):
     events_at_slot_i = []
 
     for d in range(days):
