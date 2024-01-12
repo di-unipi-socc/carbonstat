@@ -24,6 +24,8 @@ policies = [
     { "name": "naive", "high": str(round(5+max_carbon/3)) + "," + str(round(max_reqs/3)), "medium": str(round(5+max_carbon*2/3)) + "," + str(round(max_reqs*2/3))}, 
     # computed with policymaker
     # { "name": "found", "high": ",", "medium": ","},
+    # always running medium power
+    { "name": "a_med", "high": "0,0", "medium": "10000,10000"},
     # always running low power
     { "name": "a_low", "high": "0,0", "medium": "0,0"}
 ]
