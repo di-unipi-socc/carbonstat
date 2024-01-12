@@ -7,6 +7,7 @@ services:
     build: .
     environment:
       - CARBON_INTENSITY=500
+      - REQUESTS=2000
       - HIGH_POWER_LIMITS=400,600
       - MEDIUM_POWER_LIMITS=800,1100
     ports:
