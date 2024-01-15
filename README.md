@@ -9,6 +9,9 @@ Then, you check that different strategies get invoked by repeatedly invoking the
 $ curl 127.0.0.1:50000
 ```
 
+## TODO
+* preprocess data with clustering
+
 ## Notes
 * use pyca as reference of existing source for energy mix
 * use M. Aiello et al references for showing that co2 can be measured
