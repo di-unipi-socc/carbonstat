@@ -32,6 +32,7 @@ policies = [
 
 # Logging (on file)
 log = open("exp.log",mode="w",buffering=1)
+os.system("rm log.txt")
 
 # ------------------------
 #   RUN
@@ -73,8 +74,9 @@ for line in list(csv_input)[1:]:
             for i in range(iterations):
                 log.write("policy: " + policy["name"] + "\ttimestamp: " + str(timestamp) + "\titeration: " + str(i+1) + "\n")
 
-                # force re-build of image, to re-create dataset
-                os.system("docker compose -f experiment-template.yml build --no-cache >> log.txt 2>> log.txt")
+                # force re-build of image to re-create dataset
+                os.system("docker rmi carbon-aware-service >> log.txt 2>> log.txt")
+                os.system("docker compose -f experiment-template.yml build >> log.txt 2>> log.txt")
 
                 # deploy configured experiment (and wait for deployment to complete)
                 os.system("docker compose -f experiment-deploy.yml up -d >> log.txt 2>> log.txt")
@@ -172,4 +174,3 @@ csv_results.close()
 #   CLEAN
 # ------------------------
 log.close()
-os.system("rm log.txt")
