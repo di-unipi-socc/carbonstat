@@ -54,7 +54,7 @@ class Context:
 app = Flask(__name__)
 
 # app data
-with open("data/numbers/numbers.txt","r") as numbers:
+with open("data/numbers.txt","r") as numbers:
     values = numbers.read().split(",")
     app.data = [] 
     for val in values:

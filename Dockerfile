@@ -13,10 +13,7 @@ ADD monitoring monitoring
 ADD flavours flavours
 
 # Add service's data
-ADD data data
-WORKDIR /cas/data/numbers
-RUN python3 generate.py
-WORKDIR /cas
+COPY data/numbers.txt /cas/data/numbers.txt
 
 # Expose and run service
 EXPOSE 50000
