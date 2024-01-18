@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  cas:
+    image: "carbon-aware-service"
+    container_name: "carbon-aware-service"
+    build: ../..
+    environment:
+      - ASSIGNMENT=data/assignments/example.csv
+    ports:
+      - "50000:50000"
+    network_mode: bridge
