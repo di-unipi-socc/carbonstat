@@ -3,9 +3,6 @@ from enum import Enum
 from flask import Flask,request,jsonify
 from os import environ
 
-# Carbon intensity reader (mock)
-from monitoring.mock import Monitor
-
 # ------ STRATEGIES ------
 # Import and enum carbon-aware strategies (aka. flavours)
 from flavours.interface import CarbonAwareStrategy
