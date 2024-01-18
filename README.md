@@ -9,6 +9,10 @@ Then, you check that different strategies get invoked by repeatedly invoking the
 $ curl 127.0.0.1:50000
 ```
 
+## Notes on prototypes
+* PolicyMaker gets two CSVs (`timestamp,carbon,reqs` and `strategy,duration,error`) and outputs a CSV (`timestamp,strategy`)
+* Carbon-aware service takes CSV `timestamp,strategy` and enforces strategies based on actual time (to be mocked for experiments)
+
 ## TODO
 * preprocess data with clustering
 
