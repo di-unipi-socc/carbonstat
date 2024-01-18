@@ -83,7 +83,6 @@ def avg():
     result["value"] = average
     result["elapsed"] = elapsed
     result["strategy"] = strategy.nop()
-    result["carbon"] = app.context.carbon
     return jsonify(result)
 
 app.run(host='0.0.0.0',port=50000)
