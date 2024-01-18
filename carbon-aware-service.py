@@ -27,28 +27,25 @@ class Context:
     
     # initializer
     def __init__(self):
-        # high power strategy limits
-        highLimits = environ["HIGH_POWER_LIMITS"].split(",")
-        self.high = {}
-        self.high["maxCarbon"] = int(highLimits[0])
-        self.high["maxRequests"] = int(highLimits[1])
-        # medium power strategy limits 
-        mediumLimits = environ["MEDIUM_POWER_LIMITS"].split(",")
-        self.medium = {}
-        self.medium["maxCarbon"] = int(mediumLimits[0])
-        self.medium["maxRequests"] = int(mediumLimits[1])
-        # connection to monitoring 
-        self.monitor = Monitor()
+        self.assignment = {}
+        assignment = open(environ["ASSIGNMENT"])
+        for a_line in list(assignment)[1:]:
+            a = a_line.replace("\n","").split(",")
+            hour = a[0]
+            minute = a[1]
+            strategy = a[2]
+            self.assignment[hour+":"+minute] = CarbonAwareStrategies[strategy].value
+        assignment.close()
     
     # getter for carbon-aware strategy
-    def getCarbonAwareStrategy(self,high) -> CarbonAwareStrategy:
-        self.carbon = self.monitor.carbon()
-        self.requests = self.monitor.requests()
-        if high or (self.carbon <= self.high["maxCarbon"] and self.requests <= self.high["maxRequests"]):
-            return CarbonAwareStrategies.HighPower.value
-        elif self.carbon <= self.medium["maxCarbon"] and self.requests <= self.medium["maxRequests"]:
-            return CarbonAwareStrategies.MediumPower.value
-        return CarbonAwareStrategies.LowPower.value
+    def getCarbonAwareStrategy(self,force_strategy) -> CarbonAwareStrategy:
+        if force_strategy is not None:
+            return CarbonAwareStrategies[force_strategy].value
+        now = datetime.now()
+        if (now.minute < 30):
+            return self.assignment[str(now.hour)+":0"]
+        else:
+            return self.assignment[str(now.hour)+":30"]
 
 # ------ SERVICE ------
 app = Flask(__name__)
@@ -65,27 +62,25 @@ app.context = Context()
 
 @app.route("/")
 def nop():
-    # Parse params and check if forcing to not run approximated
-    forceParameter = request.args.get("force")
-    force = forceParameter and (forceParameter.lower()=="true")
+    # Parse params and check if forced to run a given strategy
+    force_strategy = request.args.get("force")
     # Get carbon-aware strategy
-    strategy = app.context.getCarbonAwareStrategy(force)
+    strategy = app.context.getCarbonAwareStrategy(force_strategy)
     # Invoke strategy with dynamic typing
     answer = strategy.nop() + "\n"
     return answer
 
 @app.route("/avg")
 def avg():
-    # Parse params and check if forcing to not run approximated
-    forceParameter = request.args.get("force")
-    force = forceParameter and (forceParameter.lower()=="true")
+    # Parse params and check if forced to run a given strategy
+    force_strategy = request.args.get("force")
     # Get carbon-aware strategy
-    strategy = app.context.getCarbonAwareStrategy(force)
+    strategy = app.context.getCarbonAwareStrategy(force_strategy)
     # Invoke strategy with dynamic typing (and measure running time)
     start = datetime.now()
     average = strategy.avg(app.data)
     end = datetime.now()
-    elapsed = round((end.timestamp() - start.timestamp())*1000,2)
+    elapsed = round((end.timestamp() - start.timestamp())*1000,2) # in milliseconds
     # Return result and elapsed time
     result = {}
     result["value"] = average
