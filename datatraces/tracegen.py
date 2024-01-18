@@ -4,11 +4,15 @@ from datetime import timedelta
 from dateutil import parser
 import csv
 import numpy as np
+from sklearn_extra.cluster import KMedoids
+import matplotlib.pyplot as plt
+import random as rnd
 
 
-# Specify the interval of days and the initial date
-days = 2
+# Specify the interval of days, the initial date and the number of clusters
+days = 30
 init_date = '2023-01-01T00:00Z'
+clusters = 8
 ###################################################
 
 half_hours = 48 * days
@@ -30,36 +34,30 @@ res = dict(r.json())['data']
 
 print('### Done!')
 
+def all_slots_from_peaks(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 1000), (24,300)]):
+    slots = []
+    for k in range(len(peaks)):
+        (h1, r1) = peaks[k]
+        (h2, r2) = peaks[(k+1)%len(peaks)]
 
-def generate_poisson_events(rate, time_duration):
-    num_events = np.random.poisson(rate * (time_duration + 1))
-    event_times = np.sort(np.random.uniform(0, time_duration + 1, num_events))
-    inter_arrival_times = np.diff(event_times)
-    return num_events, event_times, inter_arrival_times
+        diff = r2 - r1
+        steps = 2 * (h2 - h1) % 24
+        inc = diff // steps
+    
+        for i in range(steps):
+            step = r1 + inc * i 
+            slots.append(round(step))
 
-def count_events(event_times, duration):
-    i = 0
-    j = 0
+    return slots
+
+def generate_event_trace(days, peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 1000), (24,300)]):
     events_at_slot_i = []
-    while (i < duration):
-        count_events = 0
-        while event_times[j] < i + 1:
-            count_events += 1
-            j += 1
-        events_at_slot_i.append(count_events)
-        i = i + 1
-    return events_at_slot_i
 
-def generate_events(l, half_hours):
-    _, event_times, _ = generate_poisson_events(l, 8)
-    return count_events(event_times, 8)
-
-def generate_event_trace(days, lambdas = [250, 100, 500, 250, 500, 1000]):
-    events_at_slot_i = []
+    baseline = all_slots_from_peaks()
 
     for d in range(days):
-        for j in range(6):
-            events_at_slot_i += generate_events(lambdas[j], 8)
+        for reqs in baseline:
+            events_at_slot_i += [int(reqs + rnd.uniform(-0.1,0.1) * reqs)]
             
     return events_at_slot_i
 
@@ -69,6 +67,7 @@ events_at_slot_i = generate_event_trace(days)
 
 print('### Done!')
 
+carbon = []
 
 print('### Writing data to files')
 with open('data.csv', 'w', newline='') as csvfile:
@@ -76,21 +75,31 @@ with open('data.csv', 'w', newline='') as csvfile:
     writer.writerow(['time', 'actual', 'forecast', 'reqs'])
     for i in range(0, half_hours):
         writer.writerow([res[i]['from'], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], events_at_slot_i[i]])
+        carbon.append(res[i]['intensity']['forecast'])
+
+data = list(zip(carbon, events_at_slot_i))
+
+kmeans = KMedoids(n_clusters=clusters)
+kmeans.fit(data)
+
+print(kmeans.cluster_centers_)
 
 with open('input.lp', 'w') as inputfile:
-    inputfile.write('timeSlot(1..'+str(half_hours)+').\n')
-    inputfile.write('desiredPrecision(90).\n')
+    inputfile.write('timeSlot(1..'+str(clusters)+').\n')
+    inputfile.write('maxError(6).\n')
+    
+    totReqs = sum(kmeans.cluster_centers_[:, 1])
+    inputfile.write('totalReqs(' + str(int(totReqs)) + ').\n')
 
     inputfile.write('\n')
-    inputfile.write('strategy(0, 1, 85).\nstrategy(1, 2, 92).\nstrategy(2, 3, 100).\n')
+    inputfile.write('strategy(lowpower, 1, 15).\nstrategy(midpower, 2, 5).\nstrategy(hipower, 3, 0).\n')
     inputfile.write('\n')
 
-    for i in range(0, half_hours):
-        inputfile.write('reqs('+str(i+1)+', '+str(events_at_slot_i[i])+').\n')
-    
-    inputfile.write('\n')
-    
-    for i in range(0, half_hours):
-        inputfile.write('carbon('+str(i+1)+', '+str(res[i]['intensity']['forecast'])+').\n')
+    for i in range(0, clusters):
+        inputfile.write('data('+ str(i+1) + ', ' +str(int(kmeans.cluster_centers_[i][0]/10)) + ', ' + str(int(kmeans.cluster_centers_[i][1]/10)) + ').\n')
+                                                      
+plt.scatter(carbon, events_at_slot_i, c = kmeans.labels_, cmap='rainbow')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], color='black')
+plt.show()
 
 print('### Done!')

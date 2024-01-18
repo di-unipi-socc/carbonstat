@@ -1,25 +1,30 @@
-% Randomly choose adopted strategy for each time slot
-1 {adopted(T,S) : strategy(S,_,_)} 1 :- timeSlot(T).
+#minimize { TotE/TotR@1 : sumOfErrors(TotE), totalReqs(TotR) }.                                 % Eq. (1)
+sumOfErrors(TotE) :- TotE = #sum{ ER, I : assignment(I,J), timeslot(I,_,Ri), strategy(J,_,Ej), ER = Ri * Ej }.
+totalReqs(TotR) :- TotR = #sum{ Ri :  timeslot(I,_,Ri)}.
 
-% Discard models with incoherent strategies or insufficient precision
-:- adopted(T1,S1), adopted(T2,S2), T1 != T2, S1 < S2, carbon(T1,C1), carbon(T2,C2), C1 <= C2, reqs(T1,R1), reqs(T2,R2), R1 <= R2.
+#minimize { TotC@2 : emissions(TotC) }.                                                         % Eq. (2)
+emissions(TotC) :- TotC = Ci * Ri * Dj, assignment(I,J), timeslot(I,Ci,Ri), strategy(J,Dj,_). 
 
-:- desiredPrecision(DP), sumOfPrecisions(Ps), totalReqs(Rs), Ps < Rs * DP.
-% with
-sumOfPrecisions(Ps) :- Ps = #sum{ RP, T : reqs(T,R), adopted(T,S), strategy(S,_,P), RP = R * P }.
-totalReqs(Rs)       :- Rs = #sum{ R , T : reqs(T,R) }.
+:- maxError(Epsilon), sumOfErrors(TotE), totalReqs(TotR), TotE > Epsilon * TotR.                % Eq. (3)
 
-% compute emissions for a time slot
-emissions(E) :-  E = C*R*D, timeSlot(T), carbon(T,C), reqs(T,R), adopted(T,S), strategy(S,D,_).
-
-#minimize { E@2 : emissions(E) }.
-#maximize { P/R@1 : sumOfPrecisions(P), totalReqs(R) }.
+1 {assignment(I,J) : strategy(J,_,_)} 1 :- timeslot(I,_,_).                                     % Eq. (4)
 
 #show.
-% #show achievedPrecision(Pr) : sumOfPrecisions(P), totalReqs(R), Pr = P/R.
-% #show policyAttimeSlot(T,S) : timeSlot(T), adopted(T,S).
-#show scr(T,S,C,R) : timeSlot(T), carbon(T,C), reqs(T,R), adopted(T,S).
-#show thresholds(S,MaxR,MaxC) : 
-    strategy(S,_,_), 
-        MaxR = #max{ R, T : reqs(T,R),  adopted(T,S), timeSlot(T)},
-        MaxC = #max{ C, T : carbon(T,C), adopted(T,S), timeSlot(T) }.
+#show assignment/2.
+
+maxError(6).
+
+strategy(1, 1, 15).
+strategy(2, 2, 5).
+strategy(3, 3, 0).
+
+timeslot(1, 94, 39).
+timeslot(2, 21, 78).
+timeslot(3, 15, 96).
+timeslot(4, 20, 64).
+timeslot(5, 83, 56).
+timeslot(6, 77, 68).
+timeslot(7, 82, 82).
+timeslot(8, 70, 19).
+timeslot(9, 20, 48).
+timeslot(10, 20, 20).
