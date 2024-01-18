@@ -21,7 +21,7 @@ policies = [
     # always running full power
     { "name": "a_full", "high": "10000,10000", "medium": "10000,10000"},
     # naive partitioning (three equal-sized chunks per dimension)
-    { "name": "naive", "high": str(round(5+max_carbon/3)) + "," + str(round(max_reqs/3)), "medium": str(round(5+max_carbon*2/3)) + "," + str(round(max_reqs*2/3))}, 
+    # { "name": "naive", "high": str(round(5+max_carbon/3)) + "," + str(round(max_reqs/3)), "medium": str(round(5+max_carbon*2/3)) + "," + str(round(max_reqs*2/3))}, 
     # computed with policymaker
     # { "name": "found", "high": ",", "medium": ","},
     # always running medium power
@@ -40,9 +40,9 @@ os.system("rm log.txt")
 log.write("* running experiments\n")
 # open input csv file
 csv_input = open(csv_input_file,mode="r")
-# open output csv file (policy,timestamp,carbon,min_precision,average_precision)
+# open output csv file (policy,timestamp,carbon,max_error,avg_error,avg_time)
 csv_output = open(csv_output_file,mode="w",buffering=1)
-csv_output.write("policy,timestamp,requests,carbon_emissions,min_precision,avg_precision\n")
+csv_output.write("policy,timestamp,requests,carbon_emissions,max_error,avg_error,avg_time\n")
 # run queries for each timestamp
 for line in list(csv_input)[1:]:
     # get timestamp, carbon, and requests
@@ -69,8 +69,9 @@ for line in list(csv_input)[1:]:
 
             # repeat run for the given number of iterations
             total_carbon = 0
-            min_precision = 100
-            avg_precision = 0
+            max_error = 0
+            avg_error = 0
+            avg_time = 0
             for i in range(iterations):
                 log.write("policy: " + policy["name"] + "\ttimestamp: " + str(timestamp) + "\titeration: " + str(i+1) + "\n")
 
@@ -92,29 +93,36 @@ for line in list(csv_input)[1:]:
                         continue
             
                 # send queries and process results
-                ith_avg_precision = 0
+                ith_avg_error = 0
+                ith_avg_time = 0
                 for j in range(requests):
                     # send query
                     response = get("http://127.0.0.1:50000/avg").json()
+                    # measure elapsed time
+                    elapsed_time = float(response["elapsed"])
+                    ith_avg_time += elapsed_time
+                    elapsed_hours = elapsed_time/(3600*1000) # elapsed hours for computation (h)
                     # measure carbon emission (considering carbon intensity, elapsed time, and power consumption)
                     carbon_intensity = float(response["carbon"])*1000 # mg of co2-eq/(kW*h)
-                    elapsed_time = float(response["elapsed"])/(3600*1000) # elapsed hours for computation (h)
-                    total_carbon += round(carbon_intensity * power_consumption * elapsed_time,2)
+                    total_carbon += round(carbon_intensity * power_consumption * elapsed_hours,2)
                     # compute precision
                     deviation = abs(float(response["value"]) - correct_avg)
-                    precision = 100 - round(deviation/correct_avg*100,2)
-                    if precision < min_precision:
-                        min_precision = precision
-                    ith_avg_precision += precision
-                ith_avg_precision = ith_avg_precision/requests # requests are assumed to be > 0
-                avg_precision += ith_avg_precision
+                    error = round(deviation/correct_avg*100,2)
+                    if error > max_error:
+                        max_error = error
+                    ith_avg_error += error
+                ith_avg_error = ith_avg_error/requests # requests are assumed to be > 0
+                avg_error += ith_avg_error
+                ith_avg_time = ith_avg_time/requests # requests are assumed to be > 0
+                avg_time += ith_avg_time
 
                 # undeploy experiment
                 os.system("docker compose -f experiment-deploy.yml down 2>> log.txt")
 
             # write results on the output csv file
-            avg_precision = avg_precision/iterations
-            csv_output.write(policy["name"] + "," + timestamp + "," + str(requests) + "," + str(total_carbon) + "," + str(round(min_precision,2)) + "," + str(round(avg_precision,2)) + "\n") 
+            avg_error = avg_error/iterations
+            avg_time = avg_time/iterations
+            csv_output.write(policy["name"] + "," + timestamp + "," + str(requests) + "," + str(round(total_carbon,2)) + "," + str(round(max_error,2)) + "," + str(round(avg_error,2)) + "," + str(round(avg_time,2)) + "\n") 
 # close input & output csv files
 csv_input.close()
 csv_output.close()
@@ -128,8 +136,8 @@ stats = {}
 for policy in policies: 
     stats[policy["name"]] = {}
     stats[policy["name"]]["carbon"] = 0
-    stats[policy["name"]]["min_precision"] = 100
-    stats[policy["name"]]["precisions"] = []
+    stats[policy["name"]]["max_error"] = 100
+    stats[policy["name"]]["stats"] = []
 
 # extract data from csv output file
 csv_output = open(csv_output_file,"r")
@@ -139,35 +147,40 @@ for line in list(csv_output)[1:]:
     policy = data[0]
     requests = int(data[2])
     carbon = float(data[3])
-    min_precision = float(data[4])
-    avg_precision = float(data[5])
+    max_error = float(data[4])
+    avg_error = float(data[5])
+    avg_time = float(data[6])
     # update policy's overall carbon emissions
     stats[policy]["carbon"] += carbon
     #  update policy's overall min precision
-    if min_precision < stats[policy]["min_precision"]:
-        stats[policy]["min_precision"] = min_precision
-    # add [requests,avg_precision] to precisions (to later compute the policy's overall avg)
-    stats[policy]["precisions"].append({"requests": requests, "avg_precision": avg_precision})
+    if max_error < stats[policy]["max_error"]:
+        stats[policy]["max_error"] = max_error
+    # add [requests,avg_error] to precisions (to later compute the policy's overall avg)
+    stats[policy]["stats"].append({"requests": requests, "avg_error": avg_error, "avg_time": avg_time})
 csv_output.close()
 
 # compute each policy's overall avg precision
 for policy in policies:
     tot_requests = 0
-    avg_precision = 0
-    for rp in stats[policy["name"]]["precisions"]:
+    avg_error = 0
+    avg_time = 0
+    for rp in stats[policy["name"]]["stats"]:
         tot_requests += rp["requests"]
-        avg_precision += rp["avg_precision"]*rp["requests"]
-    stats[policy["name"]]["avg_precision"] = round(avg_precision/tot_requests,2)
-    stats[policy["name"]].pop("precisions",None)
+        avg_error += rp["avg_error"]*rp["requests"]
+        avg_time += rp["avg_time"]*rp["requests"]
+    stats[policy["name"]]["avg_error"] = round(avg_error/tot_requests,2)
+    stats[policy["name"]]["avg_time"] = round(avg_time/tot_requests,2)
+    stats[policy["name"]].pop("stats",None)
 
 # write policy stats on csv
 csv_results = open(csv_results_file,"w")
-csv_results.write("policy,carbon_emissions,min_precision,avg_precision\n")
+csv_results.write("policy,carbon_emissions,max_error,avg_error,avg_time\n")
 for policy in policies:
     csv_results.write(policy["name"] + ",")
     csv_results.write(str(stats[policy["name"]]["carbon"]) + ",")
-    csv_results.write(str(stats[policy["name"]]["min_precision"]) + ",")
-    csv_results.write(str(stats[policy["name"]]["avg_precision"]) + "\n")
+    csv_results.write(str(stats[policy["name"]]["max_error"]) + ",")
+    csv_results.write(str(stats[policy["name"]]["avg_error"]) + ",")
+    csv_results.write(str(stats[policy["name"]]["avg_time"]) + "\n")
 csv_results.close()
 
 # ------------------------
