@@ -163,6 +163,7 @@ cython_debug/
 experiment-deploy.yml
 results.*
 data/experiment/results*
+data/time_error/results*
 *numbers.txt
 log.txt
 *DS_Store

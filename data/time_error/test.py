@@ -6,7 +6,7 @@ from time import sleep
 #   CONFIG
 # ------------------------
 # Config data
-reqs = 50
+reqs = 100
 iterations = 20
 totalReqs = reqs * iterations
 
@@ -14,6 +14,8 @@ strategies = ["HighPower","MediumPower","LowPower"]
 
 # Clean logs
 os.system("rm log.txt")
+raw_results = open("results_raw.csv","w",buffering=1)
+raw_results.write("iteration,strategy,result,elapsed_time,error\n")
 
 # ------------------------
 #   RUN
@@ -27,7 +29,6 @@ for s in strategies:
 
 # Run queries 
 for i in range(iterations):
-    print("iteration: ",i)
     # force re-build of image to re-create dataset
     os.system("docker rmi carbon-aware-service >> log.txt 2>> log.txt")
     os.system("docker compose build >> log.txt 2>> log.txt")
@@ -48,13 +49,17 @@ for i in range(iterations):
     # for each available strategy
     for s in strategies:
         for r in range(reqs):
-            print("  strategy:", s," req: ", r)
             response = get("http://127.0.0.1:50000/avg?force="+s).json()
             # sum elapsed time
-            times[s] += round(float(response["elapsed"]),2)
+            elapsed = round(float(response["elapsed"]),2)
+            times[s] += elapsed
             # sum error
             deviation = abs(float(response["value"]) - correct_avg)
-            errors[s] = round(deviation/correct_avg*100,2)
+            error = round(deviation/correct_avg*100,2)
+            errors[s] += error
+            # log
+            raw_results.write(str(i) + "," + s + "," + str(response["value"]) + "," + str(elapsed) + "," + str(error) + "\n")
+
             
 
     # undeploy service
@@ -65,6 +70,10 @@ for s in strategies:
     times[s] = round(times[s]/totalReqs,2)
     errors[s] = round(errors[s]/totalReqs,2)
 
+# ------------------------
+#   POST-PROCESS 
+# ------------------------
+
 # Write results on file
 results = open("results.csv","w")
 results.write("strategy,duration,error\n")
@@ -72,3 +81,9 @@ for s in strategies:
     results.write(s + ",")
     results.write(str(times[s]) + ",")
     results.write(str(errors[s]) + "\n")
+results.close()
+
+# ------------------------
+#   CLEAN 
+# ------------------------
+raw_results.close()
