@@ -1,4 +1,4 @@
-maxError(6).
+maxError(5).
 
 strategy(1, 1, 15).
 strategy(2, 2, 5).
@@ -52,3 +52,4 @@ timeslot(45, 50, 2).
 timeslot(46, 52, 2).
 timeslot(47, 43, 1).
 timeslot(48, 42, 1).
+
