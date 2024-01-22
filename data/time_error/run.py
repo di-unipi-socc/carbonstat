@@ -58,9 +58,7 @@ for i in range(iterations):
             error = round(deviation/correct_avg*100,2)
             errors[s] += error
             # log
-            raw_results.write(str(i) + "," + s + "," + str(response["value"]) + "," + str(elapsed) + "," + str(error) + "\n")
-
-            
+            raw_results.write(str(i) + "," + s + "," + str(response["value"]) + "," + str(elapsed) + "," + str(error) + "\n")            
 
     # undeploy service
     os.system("docker compose down >> log.txt 2>> log.txt")
