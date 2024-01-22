@@ -1,19 +1,28 @@
-def all_slots_from_peaks(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 1000), (24,300)]):
-    slots = []
-    for k in range(len(peaks)):
-        (h1, r1) = peaks[k]
-        (h2, r2) = peaks[(k+1)%len(peaks)]
+from clyngor import ASP, solve
 
-        print('h1:', h1, 'h2:', h2)
+def solving(main, input):
+    programs = [main, input]
+    clasp_options = '--opt-mode=optN', '--parallel-mode=8', '--project', '--time-limit=60'
+    answers = solve(programs, options=clasp_options, stats=True)
+    print("solver run as: `{}`".format(answers.command))
+    for answerset in answers.with_optimality.as_pyasp:
+        yield answerset
 
-        diff = r2 - r1
-        steps = 2 * (h2 - h1) % 24
-        inc = diff / steps
+answers = solving('pm.pl', 'input.lp')
 
-        print('peak', k, ':', (h1, r1), '->', (h2, r2), 'steps: ', steps, 'inc: ', inc) 
-    
-        for i in range(steps):
-            step = r1 + inc * i 
-            slots.append(round(step))
+loaded = []
+foundOpt = False
 
-    return slots         
+for (a, (c1,c2), optimal) in answers:
+    loaded.append((c1,c2,a,optimal))
+
+    if optimal:
+        print("Optimal solution found:")
+        print(c1,c2,a,optimal)
+        foundOpt = True
+        break
+
+if not foundOpt:
+    print("No optimal solution found, printing best solution:")
+    loaded = sorted(loaded)
+    print(loaded[0])

@@ -10,9 +10,8 @@ import random as rnd
 
 
 # Specify the interval of days, the initial date and the number of clusters
-days = 30
+days = 1
 init_date = '2023-01-01T00:00Z'
-clusters = 8
 ###################################################
 
 half_hours = 48 * days
@@ -79,27 +78,15 @@ with open('data.csv', 'w', newline='') as csvfile:
 
 data = list(zip(carbon, events_at_slot_i))
 
-kmeans = KMedoids(n_clusters=clusters)
-kmeans.fit(data)
-
-print(kmeans.cluster_centers_)
-
 with open('input.lp', 'w') as inputfile:
-    inputfile.write('timeSlot(1..'+str(clusters)+').\n')
     inputfile.write('maxError(6).\n')
     
-    totReqs = sum(kmeans.cluster_centers_[:, 1])
-    inputfile.write('totalReqs(' + str(int(totReqs)) + ').\n')
-
     inputfile.write('\n')
-    inputfile.write('strategy(lowpower, 1, 15).\nstrategy(midpower, 2, 5).\nstrategy(hipower, 3, 0).\n')
+    inputfile.write('strategy(1, 1, 15).\nstrategy(2, 2, 5).\nstrategy(3, 3, 0).\n')
     inputfile.write('\n')
 
-    for i in range(0, clusters):
-        inputfile.write('data('+ str(i+1) + ', ' +str(int(kmeans.cluster_centers_[i][0]/10)) + ', ' + str(int(kmeans.cluster_centers_[i][1]/10)) + ').\n')
+    for i in range(0, half_hours):
+        inputfile.write('timeslot(' + str(i+1) + ', ' + str(round(res[i]['intensity']['forecast']/3.6)) + ', ' + str(round(events_at_slot_i[i]/100)) + ').\n')
                                                       
-plt.scatter(carbon, events_at_slot_i, c = kmeans.labels_, cmap='rainbow')
-plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], color='black')
-plt.show()
 
 print('### Done!')
