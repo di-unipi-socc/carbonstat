@@ -7,7 +7,7 @@ from time import sleep
 # ------------------------
 # Config data
 reqs = 100
-iterations = 20
+iterations = 13
 totalReqs = reqs * iterations
 
 strategies = ["HighPower","MediumPower","LowPower"]
@@ -69,19 +69,6 @@ for i in range(iterations):
 for s in strategies:
     times[s] = round(times[s]/totalReqs,2)
     errors[s] = round(errors[s]/totalReqs,2)
-
-# ------------------------
-#   POST-PROCESS 
-# ------------------------
-
-# Write results on file
-results = open("results.csv","w")
-results.write("strategy,duration,error\n")
-for s in strategies:
-    results.write(s + ",")
-    results.write(str(times[s]) + ",")
-    results.write(str(errors[s]) + "\n")
-results.close()
 
 # ------------------------
 #   CLEAN 
