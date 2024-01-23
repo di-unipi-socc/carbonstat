@@ -10,7 +10,7 @@ import random as rnd
 
 
 # Specify the interval of days, the initial date and the number of clusters
-days = 7
+days = 1
 init_date = '2023-01-01T00:30Z'
 asp_time_limit = 2
 ###################################################
@@ -122,13 +122,14 @@ if not foundOpt:
 
 
 strategies = sorted([ts[1] for ts in loaded[0][2]])
-strategies = [s for (_,s) in strategies]
+strategies = [int(s) for (_,s) in strategies]
 
-strategyToName = {2: 'HighPower', 1: 'MediumPower', 0: 'LowPower'}
+indexToName = {0: 'LowPower', 1: 'MediumPower', 2: 'HighPower'}
+
 
 print('### Writing data to files')
 with open('data.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(['time', 'strategy', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
     for i in range(0, half_hours):
-        writer.writerow([res[i]['from'], strategyToName[strategies[i]], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], int(events_at_slot_i[i]+events_at_slot_i[i]*rnd.uniform(-0.1,0.1)), events_at_slot_i[i]])
+        writer.writerow([res[i]['from'], indexToName[strategies[i]], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], int(events_at_slot_i[i]+events_at_slot_i[i]*rnd.uniform(-0.1,0.1)), events_at_slot_i[i]])
