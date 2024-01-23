@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from flask import Flask,request,jsonify
 from os import environ
+from math import floor
 
 # ------ STRATEGIES ------
 # Import and enum carbon-aware strategies (aka. flavours)
@@ -28,10 +29,9 @@ class Context:
         assignment = open(environ["ASSIGNMENT"])
         for a_line in list(assignment)[1:]:
             a = a_line.replace("\n","").split(",")
-            hour = a[0]
-            minute = a[1]
-            strategy = a[2]
-            self.assignment[hour+":"+minute] = CarbonAwareStrategies[strategy].value
+            timestamp = datetime.strptime(a[0],"%Y-%m-%dT%H:%MZ")
+            strategy = a[1]
+            self.assignment[timestamp.hour + 0.5*floor(timestamp.minute/30)] = CarbonAwareStrategies[strategy].value
         assignment.close()
     
     # getter for carbon-aware strategy
@@ -39,10 +39,7 @@ class Context:
         if force_strategy is not None:
             return CarbonAwareStrategies[force_strategy].value
         now = datetime.now()
-        if (now.minute < 30):
-            return self.assignment[str(now.hour)+":0"]
-        else:
-            return self.assignment[str(now.hour)+":30"]
+        return self.assignment[now.hour + 0.5*floor(now.minute/30)]
 
 # ------ SERVICE ------
 app = Flask(__name__)
