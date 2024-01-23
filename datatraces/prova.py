@@ -2,7 +2,7 @@ from clyngor import ASP, solve
 
 def solving(main, input):
     programs = [main, input]
-    clasp_options = '--opt-mode=optN', '--parallel-mode=8', '--project', '--time-limit=60'
+    clasp_options = '--opt-mode=optN', '--parallel-mode=16', '--project', '--time-limit=900'
     answers = solve(programs, options=clasp_options, stats=True)
     print("solver run as: `{}`".format(answers.command))
     for answerset in answers.with_optimality.as_pyasp:
@@ -25,4 +25,3 @@ for (a, (c1,c2), optimal) in answers:
 if not foundOpt:
     print("No optimal solution found, printing best solution:")
     loaded = sorted(loaded)
-    print(loaded[0])

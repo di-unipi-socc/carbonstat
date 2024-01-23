@@ -1,8 +1,8 @@
-maxError(5).
+maxError(6).
 
-strategy(1, 1, 15).
-strategy(2, 2, 5).
-strategy(3, 3, 0).
+strategy(lp, 1, 15).
+strategy(mp, 2, 5).
+strategy(hp, 3, 0).
 
 timeslot(1, 21, 1).
 timeslot(2, 20, 2).
@@ -11,36 +11,36 @@ timeslot(4, 20, 3).
 timeslot(5, 21, 3).
 timeslot(6, 20, 3).
 timeslot(7, 18, 4).
-timeslot(8, 19, 5).
+timeslot(8, 19, 4).
 timeslot(9, 19, 5).
-timeslot(10, 19, 5).
-timeslot(11, 18, 6).
+timeslot(10, 19, 6).
+timeslot(11, 18, 7).
 timeslot(12, 20, 7).
 timeslot(13, 21, 7).
-timeslot(14, 21, 8).
-timeslot(15, 21, 8).
+timeslot(14, 21, 9).
+timeslot(15, 21, 9).
 timeslot(16, 22, 10).
 timeslot(17, 20, 10).
-timeslot(18, 21, 10).
+timeslot(18, 21, 9).
 timeslot(19, 21, 9).
 timeslot(20, 19, 9).
-timeslot(21, 23, 8).
+timeslot(21, 23, 7).
 timeslot(22, 22, 7).
 timeslot(23, 21, 6).
 timeslot(24, 25, 6).
 timeslot(25, 23, 5).
 timeslot(26, 25, 6).
 timeslot(27, 25, 6).
-timeslot(28, 24, 7).
+timeslot(28, 24, 6).
 timeslot(29, 25, 8).
 timeslot(30, 26, 8).
-timeslot(31, 27, 9).
-timeslot(32, 30, 10).
+timeslot(31, 27, 8).
+timeslot(32, 30, 9).
 timeslot(33, 34, 11).
-timeslot(34, 38, 10).
-timeslot(35, 48, 9).
-timeslot(36, 44, 7).
-timeslot(37, 44, 6).
+timeslot(34, 38, 8).
+timeslot(35, 48, 8).
+timeslot(36, 44, 8).
+timeslot(37, 44, 7).
 timeslot(38, 44, 6).
 timeslot(39, 45, 5).
 timeslot(40, 44, 4).
@@ -50,6 +50,5 @@ timeslot(43, 45, 3).
 timeslot(44, 47, 2).
 timeslot(45, 50, 2).
 timeslot(46, 52, 2).
-timeslot(47, 43, 1).
+timeslot(47, 43, 2).
 timeslot(48, 42, 1).
-
