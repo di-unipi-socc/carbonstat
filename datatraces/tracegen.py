@@ -11,8 +11,8 @@ import random as rnd
 
 # Specify the interval of days, the initial date and the number of clusters
 days = 1
-init_date = '2023-01-01T00:30Z'
-asp_time_limit = 2
+init_date = '2023-05-01T00:30Z'
+asp_time_limit = 30
 ###################################################
 
 half_hours = 48 * days
@@ -78,7 +78,7 @@ for i in range(0, half_hours):
 data = list(zip(carbon, events_at_slot_i))
 
 with open('input.lp', 'w') as inputfile:
-    inputfile.write('maxError(6).\n')
+    inputfile.write('maxError(9).\n')
     
     inputfile.write('\n')
     inputfile.write('strategy(0, 1, 15).\nstrategy(1, 2, 5).\nstrategy(2, 3, 0).\n')
