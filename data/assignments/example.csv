@@ -1,5 +1,4 @@
 timestamp,strategy
-2022-12-31T23:30Z,HighPower
 2023-01-01T00:00Z,HighPower
 2023-01-01T00:30Z,HighPower
 2023-01-01T01:00Z,HighPower
@@ -47,3 +46,4 @@ timestamp,strategy
 2023-01-01T22:00Z,MediumPower
 2023-01-01T22:30Z,HighPower
 2023-01-01T23:00Z,HighPower
+2023-01-01T23:30Z,HighPower
