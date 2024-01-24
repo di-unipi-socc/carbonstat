@@ -125,7 +125,9 @@ def run_iteration(input_file,output_file):
     # Logging 
     id = str(uuid1())
     preamble = id + ": "
-    logging.basicConfig(level=logging.INFO,format='%(message)s', filename='experiment.log', filemode='a')
+    logging.basicConfig(level=logging.INFO,
+                        format='[%(asctime)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S',
+                        filename='experiment.log', filemode='a')
     logging.info("Starting iteration " + id + " (input file=" + input_file +")")
 
     # Force re-build of image (to re-create dataset) and deploy application
