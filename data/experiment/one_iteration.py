@@ -12,7 +12,7 @@ import logging
 def parse_input_line(line):
     line_data = line.replace("\n","").split(",")
     data = {}
-    data["timestamp"] = line_data[0]
+    data["time_slot"] = line_data[0]
     data["strategy"] = line_data[1]
     data["actual_carbon"] = int(line_data[2])
     data["forecast_carbon"] = int(line_data[3])
@@ -23,9 +23,9 @@ def parse_input_line(line):
 # Function to write a line of the output csv file
 def write_output_line(output_file,results):
     if results is None:
-        output_file.write("timestamp,policy,total_reqs,carbon,avg_error,max_error\n")
+        output_file.write("time_slot,policy,total_reqs,carbon,avg_error,max_error\n")
     else:
-        output_file.write(str(results["timestamp"]) + ",")
+        output_file.write(str(results["time_slot"]) + ",")
         output_file.write(str(results["policy"]) + ",")
         output_file.write(str(results["total_reqs"]) + ",")
         output_file.write(str(results["carbon"]) + ",")
@@ -83,7 +83,7 @@ def run_carbostate(data):
 def run_strategy(s,data):
     # Collector of results
     results = {}
-    results["timestamp"] = data["timestamp"]
+    results["time_slot"] = data["time_slot"]
     results["total_reqs"] = data["actual_reqs"]
     results["avg_error"] = 0
     results["max_error"] = 0
@@ -147,7 +147,7 @@ def run_iteration(input_file,output_file):
             continue
     logging.info(preamble + "Correct average acquired")
     
-    # Simulate requests for each timestamp (after the starting_timestamp)
+    # Simulate requests for each time slot
     for line in list(csv_input)[1:]:
         data = parse_input_line(line)
         data["correct_avg"] = correct_avg
@@ -155,7 +155,7 @@ def run_iteration(input_file,output_file):
         # Skip line if there are no requests to simulate
         if data["actual_reqs"] == 0:
             continue
-        logging.info(preamble + "Considering time slot " + data["timestamp"])
+        logging.info(preamble + "Considering time slot " + data["time_slot"])
 
         # Run "always_low" policy
         results = run_always_low(data)
