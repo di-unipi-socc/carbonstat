@@ -6,10 +6,7 @@ services:
     container_name: "carbon-aware-service"
     build: ../..
     environment:
-      - CARBON_INTENSITY=$CARB
-      - REQUESTS=$REQS
-      - HIGH_POWER_LIMITS=$HP_LIMITS
-      - MEDIUM_POWER_LIMITS=$MP_LIMITS
+      - ASSIGNMENT=data/assignments/example.csv
     ports:
       - "50000:50000"
     network_mode: bridge
