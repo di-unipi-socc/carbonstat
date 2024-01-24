@@ -84,6 +84,7 @@ for day in range(days):
         inputfile.write('maxError(10).\n')
         
         inputfile.write('\n')
+        # TODO: insert execution times and error
         inputfile.write('strategy(0, 1, 15).\nstrategy(1, 2, 5).\nstrategy(2, 3, 0).\n')
         inputfile.write('\n')
 
@@ -135,6 +136,7 @@ for day in range(days):
         for i in range(0, half_hours):
             writer.writerow([res[i]['from'], indexToName[strategies[i]], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], int(events_at_slot_i[i]+events_at_slot_i[i]*rnd.uniform(-0.1,0.1)), events_at_slot_i[i]])
 
+        # TODO: transform in kgCO2?
         writer.writerow(['cost', loaded[0][0]])
         writer.writerow(['error', loaded[0][1]])
 
