@@ -12,7 +12,7 @@ import random as rnd
 # Specify the interval of days, the initial date and the number of clusters
 days = 12
 init_date = '2023-01-01T00:30Z'
-asp_time_limit = 900 # seconds
+asp_time_limit = 120 # seconds
 rnd.seed(42) # for reproducibility
 max_error = 10 # percentage
 ###################################################
@@ -98,7 +98,7 @@ for day in range(days):
 
     def solving(main, input):
         programs = [main, input]
-        clasp_options = '--opt-mode=optN', '--parallel-mode=4', '--project', '--time-limit='+str(asp_time_limit)
+        clasp_options = '--opt-mode=optN', '--project', '--time-limit='+str(asp_time_limit) #'--parallel-mode=',
         answers = solve(programs, options=clasp_options, stats=True)
         print("solver run as: `{}`".format(answers.command))
         for answerset in answers.with_optimality: #.as_pyasp:
