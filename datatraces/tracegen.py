@@ -10,10 +10,11 @@ import random as rnd
 
 
 # Specify the interval of days, the initial date and the number of clusters
-days = 7
-init_date = '2023-08-01T00:30Z'
-asp_time_limit = 90
+days = 12
+init_date = '2023-01-01T00:30Z'
+asp_time_limit = 900 # seconds
 rnd.seed(42) # for reproducibility
+max_error = 10 # percentage
 ###################################################
 
 for day in range(days):
@@ -80,12 +81,12 @@ for day in range(days):
 
     data = list(zip(carbon, events_at_slot_i))
 
-    with open('input.lp', 'w') as inputfile:
-        inputfile.write('maxError(10).\n')
+    with open('input'+str(day)+'.lp', 'w') as inputfile:
+        # TODO: make error vary in [1, 5, 10] 
+        inputfile.write('maxError('+str(max_error)+').\n')
         
         inputfile.write('\n')
-        # TODO: insert execution times and error
-        inputfile.write('strategy(0, 1, 15).\nstrategy(1, 2, 5).\nstrategy(2, 3, 0).\n')
+        inputfile.write('strategy(0, 36, 14).\nstrategy(1, 67, 5).\nstrategy(2, 101, 0).\n')
         inputfile.write('\n')
 
         for i in range(0, half_hours):
@@ -97,13 +98,13 @@ for day in range(days):
 
     def solving(main, input):
         programs = [main, input]
-        clasp_options = '--opt-mode=optN', '--parallel-mode=16', '--project', '--time-limit='+str(asp_time_limit)
+        clasp_options = '--opt-mode=optN', '--parallel-mode=4', '--project', '--time-limit='+str(asp_time_limit)
         answers = solve(programs, options=clasp_options, stats=True)
         print("solver run as: `{}`".format(answers.command))
         for answerset in answers.with_optimality: #.as_pyasp:
             yield answerset
 
-    answers = solving('policy_maker.pl', 'input.lp')
+    answers = solving('policy_maker.pl', 'input'+str(day)+'.lp')
 
     loaded = []
     foundOpt = False
@@ -130,15 +131,17 @@ for day in range(days):
 
 
     print('### Writing data to files')
-    with open('data'+str(day)+'.csv', 'w', newline='') as csvfile:
+    with open('./traces/data'+str(day)+'.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerow(['time', 'strategy', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
         for i in range(0, half_hours):
-            writer.writerow([res[i]['from'], indexToName[strategies[i]], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], int(events_at_slot_i[i]+events_at_slot_i[i]*rnd.uniform(-0.1,0.1)), events_at_slot_i[i]])
+            writer.writerow([res[i]['from'], indexToName[strategies[i]], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], int(events_at_slot_i[i]+events_at_slot_i[i]*rnd.uniform(-0.05,0.05)), events_at_slot_i[i]])
 
-        # TODO: transform in kgCO2?
+        writer.writerow(['init_date', init_date])  
         writer.writerow(['cost', loaded[0][0]])
         writer.writerow(['error', loaded[0][1]])
+        if foundOpt:
+            writer.writerow(['optimal', 'true'])
 
-    # add one day to init_date
-    init_date = (parser.parse(init_date) + timedelta(days=1)).isoformat()
+    # add four weeks to init_date
+    init_date = (parser.parse(init_date) + timedelta(days=28)).isoformat()
