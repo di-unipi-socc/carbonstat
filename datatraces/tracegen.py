@@ -11,7 +11,7 @@ import random as rnd
 
 # Specify the interval of days, the initial date and the number of clusters
 days = 12
-init_date = '2023-01-01T00:30Z'
+init_date = '2023-01-15T00:30Z'
 asp_time_limit = 120 # seconds
 rnd.seed(42) # for reproducibility
 max_error = 10 # percentage
@@ -81,12 +81,12 @@ for day in range(days):
 
     data = list(zip(carbon, events_at_slot_i))
 
-    with open('input'+str(day)+'.lp', 'w') as inputfile:
+    with open('./traces_err'+str(max_error)+'/input/input'+str(day)+'.lp', 'w') as inputfile:
         # TODO: make error vary in [1, 5, 10] 
         inputfile.write('maxError('+str(max_error)+').\n')
         
         inputfile.write('\n')
-        inputfile.write('strategy(0, 36, 14).\nstrategy(1, 67, 5).\nstrategy(2, 101, 0).\n')
+        inputfile.write('strategy("LowPower", 36, 14).\nstrategy("MediumPower", 67, 5).\nstrategy("HighPower", 101, 0).\n')
         inputfile.write('\n')
 
         for i in range(0, half_hours):
@@ -101,45 +101,50 @@ for day in range(days):
         clasp_options = '--opt-mode=optN', '--project', '--time-limit='+str(asp_time_limit) #'--parallel-mode=',
         answers = solve(programs, options=clasp_options, stats=True)
         print("solver run as: `{}`".format(answers.command))
-        for answerset in answers.with_optimality: #.as_pyasp:
+        for answerset in answers.with_optimality: 
             yield answerset
 
-    answers = solving('policy_maker.pl', 'input'+str(day)+'.lp')
+    answers = solving('policy_maker.pl', './traces_err'+str(max_error)+'/input/input'+str(day)+'.lp')
 
-    loaded = []
     foundOpt = False
+    carbostate, emissions, error = None, None, None
 
-    for (a, (c1,c2), optimal) in answers:
-        loaded.append((c1,c2,a,optimal))
+    for (a, (c1, c2), opt) in answers:
+        carbostate = a
+        emissions = c1
+        error = c2
+        foundOpt = opt
 
-        if optimal:
+        if foundOpt:
             print("Optimal solution found")
-            #print(c1,c2,a,optimal)
             foundOpt = True
             break
 
     if not foundOpt:
         print("No optimal solution found")
-        loaded = sorted(loaded)
-        #print(loaded[0])
 
+    timeslots = []
+    for strategy in carbostate:
+        timeslots.append(strategy[1])
 
-    strategies = sorted([ts[1] for ts in loaded[0][2]])
-    strategies = [int(s) for (_,s) in strategies]
+    sorted_timeslots = sorted(timeslots)
 
-    indexToName = {0: 'LowPower', 1: 'MediumPower', 2: 'HighPower'}
+    strategies = []
+
+    for (i,s) in sorted_timeslots:
+        strategies.append(s.replace('"', ''))
 
 
     print('### Writing data to files')
-    with open('./traces/data'+str(day)+'.csv', 'w', newline='') as csvfile:
+    with open('./traces_err'+str(max_error)+'/data'+str(day)+'.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerow(['time', 'strategy', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
         for i in range(0, half_hours):
-            writer.writerow([res[i]['from'], indexToName[strategies[i]], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], int(events_at_slot_i[i]+events_at_slot_i[i]*rnd.uniform(-0.05,0.05)), events_at_slot_i[i]])
+            writer.writerow([res[i]['from'], strategies[i], res[i]['intensity']['actual'], res[i]['intensity']['forecast'], int(events_at_slot_i[i]+events_at_slot_i[i]*rnd.uniform(-0.05,0.05)), events_at_slot_i[i]])
 
         writer.writerow(['init_date', init_date])  
-        writer.writerow(['cost', loaded[0][0]])
-        writer.writerow(['error', loaded[0][1]])
+        writer.writerow(['emissions', emissions])
+        writer.writerow(['error', error])
         if foundOpt:
             writer.writerow(['optimal', 'true'])
 
