@@ -24,9 +24,9 @@ def write_output_line(output_file,results):
         output_file.write("policy,carbon,avg_error,max_error\n")
     else:
         output_file.write(str(results["policy"]) + ",")
-        output_file.write(str(round(results["carbon"],2)) + ",")
-        output_file.write(str(round(results["avg_error"],2)) + ",")
-        output_file.write(str(round(results["max_error"],2)) + "\n")
+        output_file.write(str(round(results["carbon"],4)) + ",")
+        output_file.write(str(round(results["avg_error"],4)) + ",")
+        output_file.write(str(round(results["max_error"],4)) + "\n")
 
 # ------------------------
 #    RUN
@@ -62,7 +62,7 @@ input_file.close()
 
 # Complete aggregation
 for p in policies:
-    policy_res = res[data["policy"]]
+    policy_res = res[p]
     policy_res["avg_error"] = policy_res["avg_error"]/policy_res["total_reqs"]
 
 # Write results on output file

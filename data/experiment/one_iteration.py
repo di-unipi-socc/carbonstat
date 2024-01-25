@@ -28,9 +28,9 @@ def write_output_line(output_file,results):
         output_file.write(str(results["time_slot"]) + ",")
         output_file.write(str(results["policy"]) + ",")
         output_file.write(str(results["total_reqs"]) + ",")
-        output_file.write(str(results["carbon"]) + ",")
-        output_file.write(str(results["avg_error"]) + ",")
-        output_file.write(str(results["max_error"]) + "\n")
+        output_file.write(str(round(results["carbon"],4)) + ",")
+        output_file.write(str(round(results["avg_error"],4)) + ",")
+        output_file.write(str(round(results["max_error"],4)) + "\n")
 
 # Function to compute the emissions in a given "elapsed_time" (in ms) with a given "carbon_intensity" (in g of co2-eq/(kW*h))
 def emissions(elapsed_time,carbon_intensity):
@@ -96,7 +96,7 @@ def run_strategy(s,data):
         response = get("http://127.0.0.1:50000/avg?force="+s).json()
         # Measure error
         deviation = abs(float(response["value"]) - data["correct_avg"])
-        error = round(deviation/data["correct_avg"]*100,2)
+        error = deviation/data["correct_avg"]*100
         results["avg_error"] += error
         results["max_error"] = error if error > results["max_error"] else results["max_error"]
         # Measure elapsed time
@@ -105,11 +105,10 @@ def run_strategy(s,data):
         # Estimate carbon emission
         results["carbon"] += emissions(elapsed_time,data["actual_carbon"])
     
-    # Compute aggregated values and round them to max two decimals
-    results["avg_error"] = round(results["avg_error"]/results["total_reqs"],2)
-    results["avg_time"] = round(results["avg_time"]/results["total_reqs"],2)
-    results["carbon"] = round(results["carbon"],2)
-
+    # Compute aggregated values
+    results["avg_error"] = results["avg_error"]/results["total_reqs"]
+    results["avg_time"] = results["avg_time"]/results["total_reqs"]
+    
     # Return collected results
     return results
 
