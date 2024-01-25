@@ -8,7 +8,7 @@ To obtain an esteem of the average time and error of `carbon-aware-service.py` o
 ```
 This will generate two files:
 * `results_raw.csv` containing the results obtained by each available strategy in each iteration, and
-* `results.csv` containing the average time and error over all iterations.
+* `results.csv` containing the average time (in ms) and error over all iterations.
 
 The number of iterations can be configured by changing the value of the variable `ITERATIONS` within the script `run.sh`. Instead, the number of requests to send to each strategy in each iteration can be configured by changing the value of the variable `requests` in `run_strategies.py`.
 
