@@ -1,0 +1,4 @@
+strategy,elapsed_time,error
+HighPower,100.2091,0.0
+MediumPower,66.2948,4.4752
+LowPower,35.2861,13.4267
