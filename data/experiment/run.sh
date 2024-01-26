@@ -7,32 +7,30 @@
 rm *.log 2> /dev/null
 # Number of iterations
 ITERATIONS=2
-# List of CSV files providing information on the time period to be simulated (separated by ";")
-INPUT_FILES_STRING="example/short.csv;example/full.csv"
-INPUT_FILES=$(echo $INPUT_FILES_STRING | tr ";" "\n")
-# CSV file where to put aggregated results
-OUTPUT_FILE="results_aggregated.csv"
+# Folder containing the CSV files to be used in the experiment
+INPUT_FOLDER="error_05" # "example"
+INPUT_FILES=$(ls $INPUT_FOLDER)
 
 # --------------------
 #   RUN
 # --------------------
-INIT=1
 # Repeat for given number of iterations
-for i in $(seq $ITERATIONS)
+for INPUT_FILE in $INPUT_FILES
 do
+    INIT=1
     # Repeat each iteration for each input file
-    for INPUT_FILE in $INPUT_FILES
+    for i in $(seq $ITERATIONS)
     do
         # The very first execution creates the header of the "results.csv" file
         if [ $INIT -eq 1 ]
         then 
-            python3 one_iteration.py $INPUT_FILE results.csv --init
+            python3 one_iteration.py $INPUT_FOLDER/$INPUT_FILE results_$INPUT_FILE --init
             INIT=0
         else
-            python3 one_iteration.py $INPUT_FILE results.csv
+            python3 one_iteration.py $INPUT_FOLDER/$INPUT_FILE results_$INPUT_FILE
         fi
     done
+    
+    # Post-process results
+    python3 aggregate_results.py results_$INPUT_FILE results_aggregated_$INPUT_FILE
 done
-
-# Post-process results
-python3 aggregate_results.py results.csv $OUTPUT_FILE
