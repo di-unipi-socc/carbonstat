@@ -11,10 +11,10 @@ import random as rnd
 
 # Specify the interval of days, the initial date and the number of clusters
 days = 12
-init_date = '2023-01-15T00:30Z'
+init_date = '2023-01-25T00:30Z'
 asp_time_limit = 120 # seconds
 rnd.seed(42) # for reproducibility
-max_error = 10 # percentage
+max_error = 5 # percentage
 ###################################################
 
 for day in range(days):
