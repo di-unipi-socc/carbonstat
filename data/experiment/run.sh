@@ -8,7 +8,7 @@ rm *.log 2> /dev/null
 # Number of iterations
 ITERATIONS=2
 # List of CSV files providing information on the time period to be simulated (separated by ";")
-INPUT_FILES_STRING="input/short_example.csv;input/example.csv"
+INPUT_FILES_STRING="example/short.csv;example/full.csv"
 INPUT_FILES=$(echo $INPUT_FILES_STRING | tr ";" "\n")
 # CSV file where to put aggregated results
 OUTPUT_FILE="results_aggregated.csv"
