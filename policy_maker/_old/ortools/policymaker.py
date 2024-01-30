@@ -1,34 +1,40 @@
 from ortools.sat.python import cp_model
 
+input_time_slots = "time_slots.csv"
+input_strategies = "strategies.csv"
+
 # function to import input data
 def import_data():
-    # TODO: import data from csv?
+    # import time slots' data
+    time_slots = open(input_time_slots)
     data = {}
-    data["strategies"] = [0, 1, 2]
-    data["s_time"] = [3, 2, 1]
-    data["s_precision"] = [100, 90, 80]
-    data["time"] = [0,1,2,3,4,5,6,7,8,9,10]
-    data["rate"] = [3,4,5,2,1,6,7,2,5,6,7]
-    data["carbon"] = [100,1000,5,200,1000,100,67,567,2,800,5]
-    data["precision_threshold"] = 88
+    data["time_slots"] = []
+    for line in list(time_slots)[1:]:
+        values = line.replace("\n","").split(",")
+        t = {}
+        t["time_slot"] = values[0]
+        t["carbon"] = int(values[1])
+        t["requests"] = int(values[2])
+        data["time_slots"].append(t)
+
+    # import strategies' data
+    data["strategies"] = []
+    strategies = open(input_strategies)
+    for line in list(strategies)[1:]:
+        values = line.replace("\n","").split(",")
+        s = {}
+        s["strategy"] = values[0]
+        s["elapsed_time"] = round(float(values[1])*10)
+        s["error"] = round(float(values[2])*10)
+        data["strategies"].append(s)
     return data
 
-# function to compute the carbon emissions due to choosing a given strategy at a given time
-def emissions(strategy,start_time,data):
-    co2 = 0
-    # determine end time based on service time and max possible time
-    end_time = start_time + data["s_time"][strategy]
-    max_time = len(data["time"])-1
-    if (end_time > max_time):
-        end_time = max_time
-
-    # emissions for a single request
-    for t in range(start_time,end_time):
-        co2 += data["carbon"][t]
-    # emissions for all requests at time "start_time"
-    n_reqs = data["rate"][start_time]
-    co2 *= n_reqs
-    return co2
+# function to compute emissions due to choosing a strategy for a time_slot
+def emissions(strategy,time_slot,data):
+    carbon = data["time_slots"][time_slot]["carbon"]
+    requests = data["time_slots"][time_slot]["requests"]
+    elapsed_time = data["strategies"][strategy]["elapsed_time"]
+    return carbon * requests * elapsed_time
 
 # class to collect the results returned by the CPModel
 class SolutionCollector(cp_model.CpSolverSolutionCallback):
@@ -38,91 +44,76 @@ class SolutionCollector(cp_model.CpSolverSolutionCallback):
         # add all assignment's variables
         self.__assignment = assignment
         self.__data = data
-        for s in data["strategies"]:
-            for t in data["time"]:
-                self.__variables.append(assignment[(s,t)])
+        for t in range(len(data["time_slots"])):
+            for s in range(len(data["strategies"])):
+                self.__variables.append(assignment[(t,s)])
         self.__solution_list = []
     
     def on_solution_callback(self):
         new_solution = []
-        for t in self.__data["time"]:
-            for s in self.__data["strategies"]:
-                if self.Value(self.__assignment[(s,t)]):
+        for t in range(len(self.__data["time_slots"])):
+            for s in range(len(self.__data["strategies"])):
+                if self.Value(self.__assignment[(t,s)]):
                     new_solution.append(s)
         self.__solution_list.append(new_solution)
     
     def get_solutions(self):
         return self.__solution_list
 
-# function to compute the precision of a given solution
-def sol_precision(solution,data):
-    # weighted average of precisions
-    precision = 0
-    total_queries = 0
-    for t in data["time"]:
-        s = solution[t]
-        precision += data["s_precision"][s] * data["rate"][t]
-        total_queries += data["rate"][t]
-    return precision/total_queries
+# function to compute the emissions of a given assignment
+def assignment_emissions(assignment, data):
+    co2 = 0
+    for t in range(len(data["time_slots"])):
+        co2 += emissions(assignment[t],t,data)
+    return co2
 
-# function to compute the emissions of a given solution
-def sol_emission(solution,data):
-    e = 0
-    for t in data["time"]:
-        e += emissions(solution[t],t,data)
-    return e
-
+# function to compute average error of a given assignment
+def assignment_error(assignment, data):
+    avg_error = 0
+    total_requests = 0
+    for t in range(len(data["time_slots"])):
+        requests = data["time_slots"][t]["requests"]
+        s_error = data["strategies"][assignment[t]]["error"]
+        avg_error += requests * s_error
+        total_requests += requests
+    return avg_error/total_requests
+    
 def main():
     # get input data
     data = import_data()
+    # # DEBUG: print imported data
+    # print(data)
 
     # create model 
     model = cp_model.CpModel()
 
     # define variables (boolean variables representing the assignment of strategy s at time t)
     assignment = {}
-    for s in data["strategies"]:
-        for t in data["time"]:
-            assignment[(s,t)] = model.NewBoolVar(f"assignment_s{s}_t{t}")
+    for t in range(len(data["time_slots"])):
+        for s in range(len(data["strategies"])):
+            assignment[(t,s)] = model.NewBoolVar(f"assignment_t{t}_s{s}")
 
     # constraint: exactly one strategy s at time t
-    for t in data["time"]:
-        model.AddExactlyOne(assignment[(s,t)] for s in data["strategies"])
+    for t in range(len(data["time_slots"])):
+        model.AddExactlyOne(assignment[(t,s)] for s in range(len(data["strategies"])))
 
     # constraint: average precision is at least data["precision_threshold"]
-    min_weighted_precision = 0
-    for r in data["rate"]:
-        min_weighted_precision += r * data["precision_threshold"]
-    model.Add(min_weighted_precision <= sum(
-        assignment[(s,t)]*data["s_precision"][s]*data["rate"][t]
-        for s in data["strategies"]
-        for t in data["time"]
+    error_threshold = 50 # modelling 5.0% * 10
+    max_weighted_error_threshold = 0
+    for t in range(len(data["time_slots"])):
+        max_weighted_error_threshold += data["time_slots"][t]["requests"] * error_threshold
+    model.Add(max_weighted_error_threshold >= sum(
+        assignment[(t,s)]*data["time_slots"][t]["requests"]*data["strategies"][s]["error"]
+        for t in range(len(data["time_slots"]))
+        for s in range(len(data["strategies"]))
     ))
-
-    # constraint: assignment(s1,t1) and assignment(s2,t2) and s1<s2 => data["carbon"][t1] > data["carbon"][t2]
-    for t1 in data["time"]:
-        for t2 in data["time"]:
-            for s1 in data["strategies"]:
-                for s2 in data["strategies"]:
-                    if (s1 < s2):
-                        # create variable representing assignment(s1,t1) and assignment(s2,t2)
-                        and_assignment = model.NewBoolVar("")
-                        # assignment(s1,t1) and assignment(s2,t2) => and_assignment
-                        # (rewritten as not(assignment(s1,t1) and assignment(s2,t2)) or and_assignment)
-                        model.AddBoolOr([assignment[(s1,t1)].Not(), assignment[(s2,t2)].Not(), and_assignment])
-                        # and_assignment => assignment(s1,t1) and assignment(s2,t2)
-                        model.AddImplication(and_assignment,assignment[(s1,t1)])
-                        model.AddImplication(and_assignment,assignment[(s2,t2)])
-                        # add implication of and_assignment on carbon
-                        model.AddImplication(and_assignment,data["carbon"][t1] < data["carbon"][t2])
-
 
     # objective: minimize emission
     model.Minimize(
         sum(
-            assignment[(s,t)] * emissions(s,t,data)
-            for s in data["strategies"] 
-            for t in data["time"]
+            assignment[(t,s)] * emissions(s,t,data)
+            for t in range(len(data["time_slots"]))
+            for s in range(len(data["strategies"]))
         )
     )
 
@@ -139,28 +130,28 @@ def main():
     
     # DEBUG: print all found solutions
     for solution in solution_collector.get_solutions():
-         print(solution)
+        print("solution:", solution)
+        print("co2:", assignment_emissions(solution,data))
+        print("error:",assignment_error(solution,data))
+        print("")
     print("Execution time:", elapsed_time)
 
     # pick the solution with lowest emissions and highest precision
     # (with post-processing to escape local minima of emissions)
     solutions = solution_collector.get_solutions() # array with indexes denoting times and values denoting chosen strategies
     best_solution = solutions[0]
-    best_emissions = sol_emission(best_solution,data)
-    best_precision = sol_precision(best_solution,data)
+    best_emissions = assignment_emissions(best_solution,data)
+    best_error = assignment_error(best_solution,data)
     for solution in solutions:
-        if sol_emission(solution,data) < best_emissions:
+        if assignment_emissions(solution,data) < best_emissions:
             best_solution = solution
-        elif sol_emission(solution,data) == best_emissions and sol_precision(solution,data) > best_precision:
+        elif assignment_emissions(solution,data) == best_emissions and assignment_error(solution,data) > best_error:
             best_solution = solution
-        best_emissions = sol_emission(best_solution,data)
-        best_precision = sol_precision(best_solution,data)
-           
+        best_emissions = assignment_emissions(best_solution,data)
+        best_error = assignment_error(best_solution,data)
 
-    # DEBUG: print best solution data
-    print("Solution:", best_solution)
-    print("Emissions:", sol_emission(best_solution,data))
-    print("Precision:", sol_precision(best_solution,data))
-    # TODO: Extract thresholds by analysing picked solution
+    print("BEST:", best_solution)
+    print("co2:", best_emissions)
+    print("error:", best_error)
 
 main()
