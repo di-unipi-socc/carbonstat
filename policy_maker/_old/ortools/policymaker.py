@@ -13,8 +13,10 @@ def import_data():
         values = line.replace("\n","").split(",")
         t = {}
         t["time_slot"] = values[0]
-        t["carbon"] = int(values[1])
-        t["requests"] = int(values[2])
+        t["carbon_actual"] = int(values[1])
+        t["carbon_forecast"] = int(values[2])
+        t["requests_actual"] = int(values[3])
+        t["requests_forecast"] = int(float(values[4])) # /100)
         data["time_slots"].append(t)
 
     # import strategies' data
@@ -24,15 +26,15 @@ def import_data():
         values = line.replace("\n","").split(",")
         s = {}
         s["strategy"] = values[0]
-        s["elapsed_time"] = round(float(values[1])) # *10)
-        s["error"] = round(float(values[2])*10)
+        s["elapsed_time"] = round(float(values[1]))
+        s["error"] = round(float(values[2])*100) # considering up to 2 decimals (but as integers)
         data["strategies"].append(s)
     return data
 
 # function to compute emissions due to choosing a strategy for a time_slot
 def emissions(strategy,time_slot,data):
-    carbon = data["time_slots"][time_slot]["carbon"]
-    requests = data["time_slots"][time_slot]["requests"]
+    carbon = data["time_slots"][time_slot]["carbon_forecast"]
+    requests = data["time_slots"][time_slot]["requests_forecast"]
     elapsed_time = data["strategies"][strategy]["elapsed_time"]
     return carbon * requests * elapsed_time
 
@@ -72,17 +74,15 @@ def assignment_error(assignment, data):
     avg_error = 0
     total_requests = 0
     for t in range(len(data["time_slots"])):
-        requests = data["time_slots"][t]["requests"]
+        requests = data["time_slots"][t]["requests_forecast"]
         s_error = data["strategies"][assignment[t]]["error"]
         avg_error += requests * s_error
         total_requests += requests
-    return round((avg_error/total_requests)/10,5)
+    return round((avg_error/total_requests)/100,5)
     
 def main():
     # get input data
     data = import_data()
-    # # DEBUG: print imported data
-    # print(data)
 
     # create model 
     model = cp_model.CpModel()
@@ -98,12 +98,12 @@ def main():
         model.AddExactlyOne(assignment[(t,s)] for s in range(len(data["strategies"])))
 
     # constraint: average precision is at least data["precision_threshold"]
-    error_threshold = 50 # modelling 5.0% * 10
+    error_threshold = 200 # modelling 2.0% * 100
     max_weighted_error_threshold = 0
     for t in range(len(data["time_slots"])):
-        max_weighted_error_threshold += data["time_slots"][t]["requests"] * error_threshold
+        max_weighted_error_threshold += data["time_slots"][t]["requests_forecast"] * error_threshold
     model.Add(max_weighted_error_threshold >= sum(
-        assignment[(t,s)]*data["time_slots"][t]["requests"]*data["strategies"][s]["error"]
+        assignment[(t,s)]*data["time_slots"][t]["requests_forecast"]*data["strategies"][s]["error"]
         for t in range(len(data["time_slots"]))
         for s in range(len(data["strategies"]))
     ))
@@ -134,7 +134,6 @@ def main():
     #     print("co2:", assignment_emissions(solution,data))
     #     print("error:",assignment_error(solution,data))
     #     print("")
-    # print("Execution time:", elapsed_time)
 
     # pick the solution with lowest emissions 
     solutions = solution_collector.get_solutions() 
@@ -142,14 +141,19 @@ def main():
     best_emissions = assignment_emissions(best_solution,data)
     best_error = assignment_error(best_solution,data)
 
-    print("BEST:", best_solution)
-    print("co2:", best_emissions)
-    print("error:", best_error)
+    print("Best assignment:", best_solution)
+    print("  - CO2:", best_emissions)
+    print("  - Average error:", best_error)
+    print("  - Solve time:", round(elapsed_time,4))
 
     output_csv = open("assignment.csv","w")
-    output_csv.write("time_slot,strategy\n")
+    output_csv.write("time_slot,strategy,carbon_actual,carbon_forecast,requests_actual,requests_forecast\n")
     for t in range(len(data["time_slots"])):
         output_csv.write(data["time_slots"][t]["time_slot"] + ",")
-        output_csv.write(data["strategies"][best_solution[t]]["strategy"] + "\n")
+        output_csv.write(data["strategies"][best_solution[t]]["strategy"] + ",")
+        output_csv.write(str(data["time_slots"][t]["carbon_actual"]) + ",")
+        output_csv.write(str(data["time_slots"][t]["carbon_forecast"]) + ",")
+        output_csv.write(str(data["time_slots"][t]["requests_actual"]) + ",")
+        output_csv.write(str(data["time_slots"][t]["requests_forecast"]) + "\n")
 
 main()
