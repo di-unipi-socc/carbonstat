@@ -164,6 +164,7 @@ experiment-deploy.yml
 results.*
 data/experiment/results*
 data/time_error/results*
+policy_maker/_old/ortools/assignment.csv
 *numbers.txt
 log.txt
 *DS_Store

@@ -24,7 +24,7 @@ def import_data():
         values = line.replace("\n","").split(",")
         s = {}
         s["strategy"] = values[0]
-        s["elapsed_time"] = round(float(values[1])*10)
+        s["elapsed_time"] = round(float(values[1])) # *10)
         s["error"] = round(float(values[2])*10)
         data["strategies"].append(s)
     return data
@@ -76,7 +76,7 @@ def assignment_error(assignment, data):
         s_error = data["strategies"][assignment[t]]["error"]
         avg_error += requests * s_error
         total_requests += requests
-    return avg_error/total_requests
+    return round((avg_error/total_requests)/10,5)
     
 def main():
     # get input data
@@ -128,30 +128,28 @@ def main():
         print("No optimal solution found!")
         return 
     
-    # DEBUG: print all found solutions
-    for solution in solution_collector.get_solutions():
-        print("solution:", solution)
-        print("co2:", assignment_emissions(solution,data))
-        print("error:",assignment_error(solution,data))
-        print("")
-    print("Execution time:", elapsed_time)
+    # # DEBUG: print all found solutions
+    # for solution in solution_collector.get_solutions():
+    #     print("solution:", solution)
+    #     print("co2:", assignment_emissions(solution,data))
+    #     print("error:",assignment_error(solution,data))
+    #     print("")
+    # print("Execution time:", elapsed_time)
 
-    # pick the solution with lowest emissions and highest precision
-    # (with post-processing to escape local minima of emissions)
-    solutions = solution_collector.get_solutions() # array with indexes denoting times and values denoting chosen strategies
-    best_solution = solutions[0]
+    # pick the solution with lowest emissions 
+    solutions = solution_collector.get_solutions() 
+    best_solution = solutions[-1] # solver is such that last solution is the best
     best_emissions = assignment_emissions(best_solution,data)
     best_error = assignment_error(best_solution,data)
-    for solution in solutions:
-        if assignment_emissions(solution,data) < best_emissions:
-            best_solution = solution
-        elif assignment_emissions(solution,data) == best_emissions and assignment_error(solution,data) > best_error:
-            best_solution = solution
-        best_emissions = assignment_emissions(best_solution,data)
-        best_error = assignment_error(best_solution,data)
 
     print("BEST:", best_solution)
     print("co2:", best_emissions)
     print("error:", best_error)
+
+    output_csv = open("assignment.csv","w")
+    output_csv.write("time_slot,strategy\n")
+    for t in range(len(data["time_slots"])):
+        output_csv.write(data["time_slots"][t]["time_slot"] + ",")
+        output_csv.write(data["strategies"][best_solution[t]]["strategy"] + "\n")
 
 main()
