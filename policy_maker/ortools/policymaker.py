@@ -142,13 +142,6 @@ def main(input_time_slots,input_strategies,error_threshold,output_assignment):
         print("No optimal solution found!")
         return 
     
-    # # DEBUG: print all found solutions
-    # for solution in solution_collector.get_solutions():
-    #     print("solution:", solution)
-    #     print("co2:", assignment_emissions(solution,data))
-    #     print("error:",assignment_error(solution,data))
-    #     print("")
-
     # pick the solution with lowest emissions 
     solutions = solution_collector.get_solutions() 
     best_solution = solutions[-1] # solver is such that last solution is the best
