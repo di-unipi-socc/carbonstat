@@ -1,10 +1,13 @@
+from argparse import ArgumentParser
 from ortools.sat.python import cp_model
 
-input_time_slots = "time_slots.csv"
-input_strategies = "strategies.csv"
+# input_time_slots = "time_slots.csv"
+# input_strategies = "strategies.csv"
+
+# output_assignment = "assignment.csv"
 
 # function to import input data
-def import_data():
+def import_data(input_time_slots,input_strategies):
     # import time slots' data
     time_slots = open(input_time_slots)
     data = {}
@@ -16,7 +19,7 @@ def import_data():
         t["carbon_actual"] = int(values[1])
         t["carbon_forecast"] = int(values[2])
         t["requests_actual"] = int(values[3])
-        t["requests_forecast"] = int(float(values[4])) # /100)
+        t["requests_forecast"] = int(float(values[4]))
         data["time_slots"].append(t)
 
     # import strategies' data
@@ -30,6 +33,17 @@ def import_data():
         s["error"] = round(float(values[2])*100) # considering up to 2 decimals (but as integers)
         data["strategies"].append(s)
     return data
+
+def export_assignment(assignment,data,output_assignment):
+    output_csv = open(output_assignment,"w")
+    output_csv.write("time_slot,strategy,carbon_actual,carbon_forecast,requests_actual,requests_forecast\n")
+    for t in range(len(data["time_slots"])):
+        output_csv.write(data["time_slots"][t]["time_slot"] + ",")
+        output_csv.write(data["strategies"][assignment[t]]["strategy"] + ",")
+        output_csv.write(str(data["time_slots"][t]["carbon_actual"]) + ",")
+        output_csv.write(str(data["time_slots"][t]["carbon_forecast"]) + ",")
+        output_csv.write(str(data["time_slots"][t]["requests_actual"]) + ",")
+        output_csv.write(str(data["time_slots"][t]["requests_forecast"]) + "\n")
 
 # function to compute emissions due to choosing a strategy for a time_slot
 def emissions(strategy,time_slot,data):
@@ -80,9 +94,9 @@ def assignment_error(assignment, data):
         total_requests += requests
     return round((avg_error/total_requests)/100,5)
     
-def main():
+def main(input_time_slots,input_strategies,error_threshold,output_assignment):
     # get input data
-    data = import_data()
+    data = import_data(input_time_slots,input_strategies)
 
     # create model 
     model = cp_model.CpModel()
@@ -98,7 +112,7 @@ def main():
         model.AddExactlyOne(assignment[(t,s)] for s in range(len(data["strategies"])))
 
     # constraint: average precision is at least data["precision_threshold"]
-    error_threshold = 200 # modelling 2.0% * 100
+    error_threshold = error_threshold * 100 # modelling x% * 100
     max_weighted_error_threshold = 0
     for t in range(len(data["time_slots"])):
         max_weighted_error_threshold += data["time_slots"][t]["requests_forecast"] * error_threshold
@@ -146,14 +160,17 @@ def main():
     print("  - Average error:", best_error)
     print("  - Solve time:", round(elapsed_time,4))
 
-    output_csv = open("assignment.csv","w")
-    output_csv.write("time_slot,strategy,carbon_actual,carbon_forecast,requests_actual,requests_forecast\n")
-    for t in range(len(data["time_slots"])):
-        output_csv.write(data["time_slots"][t]["time_slot"] + ",")
-        output_csv.write(data["strategies"][best_solution[t]]["strategy"] + ",")
-        output_csv.write(str(data["time_slots"][t]["carbon_actual"]) + ",")
-        output_csv.write(str(data["time_slots"][t]["carbon_forecast"]) + ",")
-        output_csv.write(str(data["time_slots"][t]["requests_actual"]) + ",")
-        output_csv.write(str(data["time_slots"][t]["requests_forecast"]) + "\n")
+    export_assignment(best_solution,data,output_assignment)
 
-main()
+# ------------------------
+#    RUN
+# ------------------------ 
+# Parse command-line arguments
+parser = ArgumentParser("Optimizer of assignments of strategies to time slots")
+parser.add_argument('input_time_slots', type=str, help='File with time slot data')
+parser.add_argument('input_strategies', type=str, help='File with statistics on strategies')
+parser.add_argument('error', type=int, help='Tolerated error (%)')
+parser.add_argument('output_assignment', type=str, help='File where to write the output assignment')
+args = parser.parse_args()
+
+main(args.input_time_slots,args.input_strategies,int(args.error),args.output_assignment)
