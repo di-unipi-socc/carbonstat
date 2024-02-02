@@ -13,7 +13,7 @@ import random as rnd
 days = 12
 init_date = '2023-01-28T00:30Z'
 asp_time_limit = 300 # seconds
-max_error = 12 # percentage
+max_error = 50 # percentage
 rnd.seed(42+max_error) # for reproducibility
 ###################################################
 
@@ -86,19 +86,20 @@ for day in range(days):
         inputfile.write('maxError('+str(max_error)+').\n')
         
         inputfile.write('\n')
-        inputfile.write('strategy("LowPower", 36, 14).\nstrategy("MediumPower", 67, 5).\nstrategy("HighPower", 101, 0).\n')
+        inputfile.write('strategy("LowPower", 36, 134).\nstrategy("MediumPower", 67, 45).\nstrategy("HighPower", 101, 0).\n')
         inputfile.write('\n')
 
         for i in range(0, half_hours):
+            #inputfile.write('timeslot(' + str(i+1) + ', ' + str(round(res[i]['intensity']['forecast'])) + ', ' + str(round(events_at_slot_i[i])) + ').\n')
             inputfile.write('timeslot(' + str(i+1) + ', ' + str(round(res[i]['intensity']['forecast']/3.6)) + ', ' + str(round(events_at_slot_i[i]/100)) + ').\n')
-                                                        
+                                       
     print('### Done!')
 
     from clyngor import ASP, solve
 
     def solving(main, input):
         programs = [main, input]
-        clasp_options = '--opt-mode=optN', '--project', '--time-limit='+str(asp_time_limit) #'--parallel-mode=',
+        clasp_options = '--opt-mode=optN', '--project', '--time-limit='+str(asp_time_limit) ,'--parallel-mode=8'
         answers = solve(programs, options=clasp_options, stats=True)
         print("solver run as: `{}`".format(answers.command))
         for answerset in answers.with_optimality: 
