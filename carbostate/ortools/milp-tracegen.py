@@ -18,9 +18,7 @@ def download_emissions(date='2023-01-28T00:30Z'):
     delta = timedelta(days = 1, hours= 0, minutes= 0)
     to = fr + delta
 
-    headers = {
-    'Accept': 'application/json'
-    }
+    headers = {'Accept': 'application/json'}
 
     url = 'https://api.carbonintensity.org.uk/intensity/' + fr.isoformat() + '/' + to.isoformat()
     
@@ -31,7 +29,7 @@ def download_emissions(date='2023-01-28T00:30Z'):
     return res
 
 # Generates a list of requests at each slot for a given day
-def all_slots_from_peaks(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 1000), (24,300)]):
+def generate_reqs_trace(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 1000), (24,300)]):
     slots = []
     for k in range(len(peaks)):
         (h1, r1) = peaks[k]
@@ -43,37 +41,24 @@ def all_slots_from_peaks(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20,
     
         for i in range(steps):
             step = r1 + inc * i 
-            slots.append(round(step))
+            res = step * (1 + rnd.uniform(-0.1,0.1))
+            slots.append(round(res))
 
     return slots
 
-# Generates a list of requests for a given day, by varying them by +/- 10% of the baseline
-def generate_event_trace(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 1000), (24,300)]):
-    events_at_slot_i = []
-
-    baseline = all_slots_from_peaks()
-
-    for reqs in baseline:
-        events_at_slot_i += [int(reqs + rnd.uniform(-0.1,0.1) * reqs)]
-            
-    return events_at_slot_i
-
 # Generates a trace for carbon emissions and requests for a given day
-def generate_trace(init_date='2023-01-28T00:30Z'):
-    emissions = download_emissions(init_date)
-
-    reqs = generate_event_trace()
-
+def generate_traces(date='2023-01-28T00:30Z'):
+    emissions = download_emissions(date)
+    reqs = generate_reqs_trace()
     return emissions, reqs
 
 # Writes the time_slots.csv file with the (forecast and actual) emissions and requests for a given day
-def print_files(init_date='2023-01-28T00:30Z'):
-    emissions, reqs = generate_trace(init_date)
+def traces_to_file(date='2023-01-28T00:30Z'):
+    emissions, reqs = generate_traces(date)
 
-    with open('time_slots1.csv', 'w', newline='') as csvfile:
+    with open('time_slots.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerow(['time', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
         for i in range(0, 48):
             writer.writerow([emissions[i]['from'], emissions[i]['intensity']['actual'], emissions[i]['intensity']['forecast'], int(reqs[i]+reqs[i]*rnd.uniform(-0.05,0.05)), reqs[i]])
-
 
