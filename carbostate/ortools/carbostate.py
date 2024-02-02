@@ -222,6 +222,9 @@ def run(seed=42, error_threshold=9, init_date='2023-01-28T00:30Z',days = 12, ste
         main(input_time_slots,input_strategies,error_threshold,output_assignment)
         init_date = (parser.parse(init_date) + timedelta(days=step)).isoformat()
 
+# ------------------------
+#    RUN
+# ------------------------ 
 for err in [1,2,4,5,8,10,12,15]:
     run(error_threshold=err)
 
