@@ -69,13 +69,11 @@ def generate_trace(init_date='2023-01-28T00:30Z'):
 # Writes the time_slots.csv file with the (forecast and actual) emissions and requests for a given day
 def print_files(init_date='2023-01-28T00:30Z'):
     emissions, reqs = generate_trace(init_date)
-    half_hours = 48
 
     with open('time_slots1.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
-        writer.writerow(['time', 'strategy', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
-        for i in range(0, half_hours):
+        writer.writerow(['time', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
+        for i in range(0, 48):
             writer.writerow([emissions[i]['from'], emissions[i]['intensity']['actual'], emissions[i]['intensity']['forecast'], int(reqs[i]+reqs[i]*rnd.uniform(-0.05,0.05)), reqs[i]])
 
 
-print_files()
