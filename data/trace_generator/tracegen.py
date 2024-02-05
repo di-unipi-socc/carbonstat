@@ -59,8 +59,13 @@ def traces_to_file(date='2023-01-28T00:30Z'):
         for i in range(0, 48):
             writer.writerow([emissions[i]['from'], emissions[i]['intensity']['actual'], emissions[i]['intensity']['forecast'], int(reqs[i]+reqs[i]*rnd.uniform(-0.05,0.05)), reqs[i]])
 
+# Inits carbostat on the given inputs
+def carbostat_init():
+    system("cp ../../carbostat/carbostat.py .")
+
+# Runs carbostat on the given inputs
 def carbostat(input_time_slots,input_strategies,error_threshold,output_assignment):
-    cmd = "python3 ../../carbostat/carbostat.py "
+    cmd = "python3 carbostat.py "
     cmd += input_time_slots + " "
     cmd += input_strategies + " "
     cmd += error_threshold + " "
@@ -82,5 +87,6 @@ def run(seed=42, error_threshold=9, init_date='2023-01-28T00:30Z',days = 12, ste
 # ------------------------
 #    RUN
 # ------------------------ 
+carbostat_init()
 for err in [1,2,4,5,8,10,12,15]:
     run(error_threshold=err)

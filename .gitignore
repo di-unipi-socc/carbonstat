@@ -164,6 +164,7 @@ experiment-deploy.yml
 results.*
 data/experiment/results*
 data/time_error/results*
+data/trace_generator/carbostat.py
 policy_maker/_old/ortools/assignment.csv
 *numbers.txt
 log.txt
