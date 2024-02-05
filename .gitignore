@@ -165,6 +165,8 @@ results.*
 data/experiment/results*
 data/time_error/results*
 data/trace_generator/carbostat.py
+data/trace_generator/*.csv
+data/trace_generator/traces/
 policy_maker/_old/ortools/assignment.csv
 *numbers.txt
 log.txt

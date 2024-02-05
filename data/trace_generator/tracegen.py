@@ -62,11 +62,13 @@ def traces_to_file(date='2023-01-28T00:30Z'):
 # Inits carbostat on the given inputs
 def carbostat_init():
     system("cp ../../carbostat/carbostat.py .")
+    system("cp ../../carbostat/test/strategies.csv .")
+    system("mkdir traces")
 
 # Runs carbostat on the given inputs
 def carbostat(input_time_slots,input_strategies,error_threshold,output_assignment):
     cmd = "python3 carbostat.py "
-    cmd += input_time_slots + " "
+    cmd +=  input_time_slots + " "
     cmd += input_strategies + " "
     cmd += str(error_threshold) + " "
     cmd += output_assignment
@@ -75,6 +77,8 @@ def carbostat(input_time_slots,input_strategies,error_threshold,output_assignmen
     
 def run(seed=42, error_threshold=9, init_date='2023-01-28T00:30Z',days = 12, step = 28):
     rnd.seed(seed) # for reproducibility
+
+    system("mkdir traces/"+str(error_threshold))
 
     for d in range(days):
         traces_to_file(init_date)
