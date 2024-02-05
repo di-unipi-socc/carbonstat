@@ -68,10 +68,10 @@ def carbostat(input_time_slots,input_strategies,error_threshold,output_assignmen
     cmd = "python3 carbostat.py "
     cmd += input_time_slots + " "
     cmd += input_strategies + " "
-    cmd += error_threshold + " "
+    cmd += str(error_threshold) + " "
     cmd += output_assignment
     # run carbostat
-    system.cmd(cmd)
+    system(cmd)
     
 def run(seed=42, error_threshold=9, init_date='2023-01-28T00:30Z',days = 12, step = 28):
     rnd.seed(seed) # for reproducibility
