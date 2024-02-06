@@ -131,19 +131,29 @@ def main(input_time_slots,input_strategies,error_threshold,output_assignment):
     # find all possible solutions for the modelled problem
     solver = cp_model.CpSolver()
     solution_collector = SolutionCollector(assignment,data)
+    solver.parameters.enumerate_all_solutions = True
     status = solver.Solve(model,solution_collector)
     elapsed_time = solver.UserTime()
 
-    # check if problem can be solved
+    # check if optimal solution was found
     if status != cp_model.OPTIMAL:
         print("No optimal solution found!")
         return 
     
-    # pick the solution with lowest emissions 
+    # pick the solution with the lowest emissions 
     solutions = solution_collector.get_solutions() 
-    best_solution = solutions[-1] # solver is such that last solution is the best
+    best_solution = solutions[0] 
     best_emissions = assignment_emissions(best_solution,data)
     best_error = assignment_error(best_solution,data)
+    # (if multiple solutions have the lowest emissions, pick that with lowest error)
+    for s in solutions[1:]:
+        s_emissions = assignment_emissions(s,data)
+        s_error = assignment_error(s,data)
+        print(s, s_emissions, s_error)
+        if s_emissions < best_emissions or (s_emissions == best_emissions and s_error < best_error):
+            best_solution = s
+            best_emissions = s_emissions
+            best_error = s_error
 
     print("Best assignment:", best_solution)
     print("  - CO2:", best_emissions)
