@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 #    UTILITY 
 # ------------------------
 # List of considered policies
-policies = ["always_low","always_medium","always_high","naive","carbostate"]
+policies = ["always_low","always_medium","always_high","naive","carbostat"]
 
 # Function to parse a line of the input csv file
 def parse_input_line(line):
@@ -63,7 +63,8 @@ input_file.close()
 # Complete aggregation
 for p in policies:
     policy_res = res[p]
-    policy_res["avg_error"] = policy_res["avg_error"]/policy_res["total_reqs"]
+    if policy_res["total_reqs"] > 0:
+        policy_res["avg_error"] = policy_res["avg_error"]/policy_res["total_reqs"]
 
 # Write results on output file
 output_file = open(args.output_file,"w")
