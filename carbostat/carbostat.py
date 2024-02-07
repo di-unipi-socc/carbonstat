@@ -141,11 +141,11 @@ def main(input_time_slots,input_strategies,error_threshold,output_assignment):
         return 
     
     # pick the solution with the lowest emissions 
+    # (if multiple solutions have the lowest emissions, pick that with lowest error)
     solutions = solution_collector.get_solutions() 
     best_solution = solutions[0] 
     best_emissions = assignment_emissions(best_solution,data)
     best_error = assignment_error(best_solution,data)
-    # (if multiple solutions have the lowest emissions, pick that with lowest error)
     for s in solutions[1:]:
         s_emissions = assignment_emissions(s,data)
         s_error = assignment_error(s,data)
