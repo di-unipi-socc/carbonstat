@@ -73,10 +73,10 @@ def run_naive(data):
     results["policy"] = "naive"
     return results
 
-# Function to simulate the execution of the "carbostate" policy
-def run_carbostate(data):
+# Function to simulate the execution of the "carbostat" policy
+def run_carbostat(data):
     results = run_strategy(data["strategy"],data)
-    results["policy"] = "carbostate"
+    results["policy"] = "carbostat"
     return results
 
 # Function to execute a given strategy "s" on the input "data"
@@ -176,10 +176,10 @@ def run_iteration(input_file,output_file):
         write_output_line(csv_output,results)
         logging.info(preamble + "Simulation of 'naive' completed")
         
-        # Run "carbostate" policy
-        results = run_carbostate(data)
+        # Run "carbostat" policy
+        results = run_carbostat(data)
         write_output_line(csv_output,results)
-        logging.info(preamble + "Simulation of 'carbostate' completed")
+        logging.info(preamble + "Simulation of 'carbostat' completed")
 
     # Undeploy application
     system("docker compose down >> /dev/null 2>> /dev/null")
