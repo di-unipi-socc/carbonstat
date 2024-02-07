@@ -1,0 +1,7 @@
+time,strategy,actual_carbon,forecast_carbon,actual_reqs,forecast_reqs
+2023-01-01T14:30Z,HighPower,114,97,691,745
+2023-01-01T15:00Z,HighPower,129,107,917,936
+2023-01-01T15:30Z,LowPower,145,122,870,956
+2023-01-01T16:00Z,HighPower,150,136,992,913
+2023-01-01T16:30Z,MediumPower,155,174,958,960
+2023-01-01T17:00Z,MediumPower,162,160,943,902
