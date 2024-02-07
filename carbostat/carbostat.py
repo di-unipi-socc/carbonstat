@@ -149,18 +149,21 @@ def main(input_time_slots,input_strategies,error_threshold,output_assignment):
     for s in solutions[1:]:
         s_emissions = assignment_emissions(s,data)
         s_error = assignment_error(s,data)
-        print(s, s_emissions, s_error)
+        # print(s, s_emissions, s_error)
         if s_emissions < best_emissions or (s_emissions == best_emissions and s_error < best_error):
             best_solution = s
             best_emissions = s_emissions
             best_error = s_error
 
-    print("Best assignment:", best_solution)
-    print("  - CO2:", best_emissions)
-    print("  - Average error:", best_error)
-    print("  - Solve time:", round(elapsed_time,4))
-
     export_assignment(best_solution,data,output_assignment)
+
+    labeled_best_solution = []
+    for s_index in best_solution:
+        labeled_best_solution.append(data["strategies"][s_index]["strategy"])
+    print("Best assignment:", labeled_best_solution)
+    print("  - Emissions:", round(best_emissions/(3600*1000*1000),4),"gCO2/W")
+    print("  - Average error:", round(best_error,4), "%")
+    print("  - Solve time:", round(elapsed_time,4), "ms")
 
 # ------------------------
 #    RUN
