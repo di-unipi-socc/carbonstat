@@ -5,7 +5,6 @@ import numpy as np
 # Function to parse the results contained in a given file
 def parse_results(file_name):
     r = {}
-    r["error_threshold"] = int(f_name.split(".")[0].split("_")[-1])
     r["strategies"] = {}
     file = open(file_name,"r")
     for result in list(file)[1:]:
@@ -63,7 +62,6 @@ for f_name in result_files:
     plt.bar(x - bar_width/2, hist_data["saved_co2"], width=bar_width, label='Emission reduction')
     plt.bar(x + bar_width/2, hist_data["error"], width=bar_width, label='Average error')
 
-    threshold = res["error_threshold"]
     # plt.axhline(y=threshold, color='black', linestyle='dotted', label='Tolerated error')
 
     plt.xticks(x, hist_data["labels"])  # Posiziona le etichette sull'asse x
