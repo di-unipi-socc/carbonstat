@@ -52,4 +52,5 @@ result_files = filter(lambda x : x.startswith("results"),result_files)
 for f_name in result_files:
     res = parse_results(f_name)
     hist_data = prepare_hist(res)
+    # TODO: add plotting
     print(hist_data)
