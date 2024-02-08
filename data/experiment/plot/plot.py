@@ -18,17 +18,26 @@ def parse_results(file_name):
     return r
 
 # Utility function to compute percentage of saved carbon
-def saved(carbon,max_carbon):
-    return round(carbon/max_carbon,2)
+def saved(strategy,data):
+    strategy_co2 = data["strategies"][strategy]["carbon"]
+    max_co2 = data["max_carbon"]
+    saved_co2 = max_co2 - strategy_co2
+    return round(saved_co2*100/max_co2,2)
 
 # Function to prepare histogram data
 def prepare_hist(data):
-    hist_data = []
+    hist_data = {}
+    hist_data["x"] = [] # x-axis: list of strategy names
+    hist_data["y"] = [] # y-axis: list of [saved_co2,error] for each strategy
     for s in data["strategies"]:
-        s_data = []
-        s_data.append(data["strategies"][s]["carbon"])
-        s_data.append(data["strategies"][s]["avg_error"])
-        hist_data.append(s_data)
+        if not s == "always_high":
+            # get x data (strategy name)
+            hist_data["x"].append(s)
+            # get y data (saved_co2,error)
+            s_data = []
+            s_data.append(saved(s,data))
+            s_data.append(data["strategies"][s]["avg_error"])
+            hist_data["y"].append(s_data)
     return hist_data
 
 # ----------------------
