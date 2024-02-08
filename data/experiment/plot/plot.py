@@ -1,4 +1,6 @@
 from os import listdir
+from matplotlib import pyplot as plt
+import numpy as np
 
 # Function to parse the results contained in a given file
 def parse_results(file_name):
@@ -27,17 +29,16 @@ def saved(strategy,data):
 # Function to prepare histogram data
 def prepare_hist(data):
     hist_data = {}
-    hist_data["x"] = [] # x-axis: list of strategy names
-    hist_data["y"] = [] # y-axis: list of [saved_co2,error] for each strategy
+    hist_data["labels"] = [] # x-axis: list of strategy names
+    hist_data["saved_co2"] = [] # y-axis: list of saved_co2 for each strategy
+    hist_data["error"] = [] # y-axis: list of error for each strategy
     for s in data["strategies"]:
         if not s == "always_high":
             # get x data (strategy name)
-            hist_data["x"].append(s)
+            hist_data["labels"].append(s)
             # get y data (saved_co2,error)
-            s_data = []
-            s_data.append(saved(s,data))
-            s_data.append(data["strategies"][s]["avg_error"])
-            hist_data["y"].append(s_data)
+            hist_data["saved_co2"].append(saved(s,data))
+            hist_data["error"].append(data["strategies"][s]["avg_error"])
     return hist_data
 
 # ----------------------
@@ -46,11 +47,29 @@ def prepare_hist(data):
 
 # Get names of result files to be plotted
 result_files = listdir(".")
-result_files = filter(lambda x : x.startswith("results"),result_files)
+result_files = filter(lambda x : x.startswith("results") and x.endswith("csv"),result_files)
 
 # Plot a different histogram chart for each result file
 for f_name in result_files:
     res = parse_results(f_name)
     hist_data = prepare_hist(res)
-    # TODO: add plotting
-    print(hist_data)
+    
+    # Plot setting (with two adjacent subplots)
+    bar_width = 0.35
+    plt.rcParams['font.family'] = 'Helvetica'
+    x = np.arange(len(hist_data["labels"]))
+    
+    plt.figure(figsize=(12, 5))
+    plt.bar(x - bar_width/2, hist_data["saved_co2"], width=bar_width, label='Emission reduction')
+    plt.bar(x + bar_width/2, hist_data["error"], width=bar_width, label='Average error')
+
+    threshold = res["error_threshold"]
+    # plt.axhline(y=threshold, color='black', linestyle='dotted', label='Tolerated error')
+
+    plt.xticks(x, hist_data["labels"])  # Posiziona le etichette sull'asse x
+    plt.legend()
+
+    # Regola lo spazio tra i grafici per evitare sovrapposizioni
+    plt.tight_layout()
+    plt.savefig(f_name.split(".")[0] + ".pdf")
+    # plt.show()
