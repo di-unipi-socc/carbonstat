@@ -3,7 +3,7 @@ always_low,48022.29,13.43,13.46
 always_medium,90571.5,4.48,4.49
 always_high,136321.71,0.0,0
 naive,57592.69,10.88,13.46
-carbostat (e=1),0,0,0
+carbostat (e=1),118159.7,1.0,4.49
 carbostat (e=2),0,0,0
 carbostat (e=4),94206.12,4.0,13.46
 carbostat (e=8),0,0,0
