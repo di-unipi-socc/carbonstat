@@ -53,22 +53,27 @@ for f_name in result_files:
     res = parse_results(f_name)
     hist_data = prepare_hist(res)
     
-    # Plot setting (with two adjacent subplots)
+    # Plot setup
     bar_width = 0.35
     plt.rcParams['font.family'] = 'Helvetica'
     plt.rcParams['font.size'] = '25'
-    x = np.arange(len(hist_data["labels"]))
-    
     plt.figure(figsize=(15, 6))
+
+    # Setting x axis
+    x = np.arange(len(hist_data["labels"]))
+    plt.xticks(x, hist_data["labels"])  
+
+    # Setting y axis
+    max_y = 70
+    plt.yticks(np.arange(0, max_y, 10))
+    for y in np.arange(5, max_y, 5):
+        plt.axhline(y, color='grey', linestyle='dotted')
+
+    # Displaying bars
     plt.bar(x - bar_width/2, hist_data["saved_co2"], width=bar_width, label='Emission reduction')
     plt.bar(x + bar_width/2, hist_data["error"], width=bar_width, label='Average error')
 
-    # plt.axhline(y=threshold, color='black', linestyle='dotted', label='Tolerated error')
-
-    plt.xticks(x, hist_data["labels"])  # Posiziona le etichette sull'asse x
+    # Printout
     plt.legend()
-
-    # Regola lo spazio tra i grafici per evitare sovrapposizioni
     plt.tight_layout()
     plt.savefig(f_name.split(".")[0] + ".pdf")
-    # plt.show()
