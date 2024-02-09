@@ -34,7 +34,7 @@ def prepare_hist(data):
     for s in data["strategies"]:
         if not s == "always_high":
             # get x data (strategy name)
-            hist_data["labels"].append(s)
+            hist_data["labels"].append(s.replace("_","\n"))
             # get y data (saved_co2,error)
             hist_data["saved_co2"].append(saved(s,data))
             hist_data["error"].append(data["strategies"][s]["avg_error"])
@@ -56,9 +56,10 @@ for f_name in result_files:
     # Plot setting (with two adjacent subplots)
     bar_width = 0.35
     plt.rcParams['font.family'] = 'Helvetica'
+    plt.rcParams['font.size'] = '25'
     x = np.arange(len(hist_data["labels"]))
     
-    plt.figure(figsize=(12, 5))
+    plt.figure(figsize=(15, 6))
     plt.bar(x - bar_width/2, hist_data["saved_co2"], width=bar_width, label='Emission reduction')
     plt.bar(x + bar_width/2, hist_data["error"], width=bar_width, label='Average error')
 
