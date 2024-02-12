@@ -11,8 +11,8 @@ ITERATIONS=2
 INPUT_FOLDER=$1
 INPUT_FILES=$(ls $INPUT_FOLDER)
 # Output files
-OUTPUT_FILE=results_$INPUT_FOLDER.csv
-OUTPUT_AGG_FILE=results_aggregated_$INPUT_FOLDER.csv
+OUTPUT_FILE=results_$2.csv
+OUTPUT_AGG_FILE=results_aggregated_$2.csv
 
 # --------------------
 #   RUN
