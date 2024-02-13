@@ -1,17 +1,33 @@
 from argparse import ArgumentParser
 
+# Collector for the experiment's aggregated results
+res = {}
+# List of considered policies
+policies = [] # ["always_low","always_medium","always_high","naive","carbostat_e=1","carbostat_e=2","carbostat_e=4","carbostat_e=8"]
+
 # ------------------------
 #    UTILITY 
 # ------------------------
-# List of considered policies
-policies = ["always_low","always_medium","always_high","naive","carbostat"]
+
+# Function to add a record to "res" concerning a given policy
+def add_policy(p):
+    policies.append(p)
+    res[p] = {}
+    res[p]["policy"] = p
+    res[p]["total_reqs"] = 0
+    res[p]["carbon"] = 0
+    res[p]["avg_error"] = 0
+    res[p]["max_error"] = 0
 
 # Function to parse a line of the input csv file
 def parse_input_line(line):
     line_data = line.replace("\n","").split(",")
     data = {}
     data["timestamp"] = line_data[0]
-    data["policy"] = line_data[1]
+    policy = line_data[1]
+    if not (policy in res):
+        add_policy(policy)
+    data["policy"] = policy
     data["total_reqs"] = int(line_data[2])
     data["carbon"] = float(line_data[3])
     data["avg_error"] = float(line_data[4])
@@ -37,16 +53,6 @@ parser.add_argument('input_file', type=str, help='File with raw results')
 parser.add_argument('output_file', type=str, help='File with aggregated results')
 args = parser.parse_args()
 
-# Collector for the experiment's aggregated results
-res = {}
-for p in policies:
-    res[p] = {}
-    res[p]["policy"] = p
-    res[p]["total_reqs"] = 0
-    res[p]["carbon"] = 0
-    res[p]["avg_error"] = 0
-    res[p]["max_error"] = 0
-
 # Aggregation of the experiment's results
 input_file = open(args.input_file,"r")
 for line in list(input_file)[1:]:
@@ -57,8 +63,9 @@ for line in list(input_file)[1:]:
     policy_res["avg_error"] += data["avg_error"]*data["total_reqs"]
     if data["max_error"] > policy_res["max_error"]: 
         policy_res["max_error"] = data["max_error"]
-
 input_file.close()
+
+print(policies)
 
 # Complete aggregation
 for p in policies:

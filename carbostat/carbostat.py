@@ -36,11 +36,11 @@ def export_assignment(assignment,data,output_assignment):
     output_csv.write("time_slot,strategy,carbon_actual,carbon_forecast,requests_actual,requests_forecast\n")
     for t in range(len(data["time_slots"])):
         output_csv.write(data["time_slots"][t]["time_slot"] + ",")
-        output_csv.write(data["strategies"][assignment[t]]["strategy"] + ",")
-        output_csv.write(str(data["time_slots"][t]["carbon_actual"]) + ",")
-        output_csv.write(str(data["time_slots"][t]["carbon_forecast"]) + ",")
-        output_csv.write(str(data["time_slots"][t]["requests_actual"]) + ",")
-        output_csv.write(str(data["time_slots"][t]["requests_forecast"]) + "\n")
+        output_csv.write(data["strategies"][assignment[t]]["strategy"] + "\n") #",")
+        # output_csv.write(str(data["time_slots"][t]["carbon_actual"]) + ",")
+        # output_csv.write(str(data["time_slots"][t]["carbon_forecast"]) + ",")
+        # output_csv.write(str(data["time_slots"][t]["requests_actual"]) + ",")
+        # output_csv.write(str(data["time_slots"][t]["requests_forecast"]) + "\n")
 
 # function to compute emissions due to choosing a strategy for a time_slot
 def emissions(strategy,time_slot,data):

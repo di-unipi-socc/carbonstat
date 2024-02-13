@@ -1,3 +1,0 @@
-time,strategy,actual_carbon,forecast_carbon,actual_reqs,forecast_reqs
-2023-01-01T09:00Z,HighPower,78,69,821,857
-2023-01-01T09:30Z,MediumPower,78,82,915,869
