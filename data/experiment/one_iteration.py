@@ -64,9 +64,9 @@ def run_always_high(data):
 # Function to simulate the execution of the "naive" policy
 def run_naive(data):
     results = {}
-    if data["forecast_carbon"] < 110 and data["forecast_reqs"] < 330:
+    if data["forecast_carbon"] < 199 and data["forecast_reqs"] < 330:
         results = run_strategy("HighPower",data)
-    elif data["forecast_carbon"] < 200 and data["forecast_reqs"] < 660: 
+    elif data["forecast_carbon"] < 299 and data["forecast_reqs"] < 660: 
         results = run_strategy("MediumPower",data)
     else: 
         results = run_strategy("LowPower",data)
