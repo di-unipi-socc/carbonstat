@@ -190,20 +190,20 @@ def run_iteration(input_file,output_file):
         write_output_line(csv_output,results)
         logging.info(preamble + "Simulation of 'always_low' completed")
         
-        # # Run "always_medium" policy
-        # results = run_always_medium(data)
-        # write_output_line(csv_output,results)
-        # logging.info(preamble + "Simulation of 'always_medium' completed")
+        # Run "always_medium" policy
+        results = run_always_medium(data)
+        write_output_line(csv_output,results)
+        logging.info(preamble + "Simulation of 'always_medium' completed")
         
-        # # Run "always_high" policy
-        # results = run_always_high(data)
-        # write_output_line(csv_output,results)
-        # logging.info(preamble + "Simulation of 'always_high' completed")
+        # Run "always_high" policy
+        results = run_always_high(data)
+        write_output_line(csv_output,results)
+        logging.info(preamble + "Simulation of 'always_high' completed")
         
-        # # Run "naive" policy
-        # results = run_naive(data)
-        # write_output_line(csv_output,results)
-        # logging.info(preamble + "Simulation of 'naive' completed")
+        # Run "naive" policy
+        results = run_naive(data)
+        write_output_line(csv_output,results)
+        logging.info(preamble + "Simulation of 'naive' completed")
         
         # Run "carbostat_e=X" policy (with X=1,2,4,8)
         for e in errors:
