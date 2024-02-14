@@ -1,31 +1,35 @@
+from argparse import ArgumentParser
 import requests
-from datetime import datetime
 from datetime import timedelta
-from dateutil import parser
+from dateutil import parser as date_parser
 import csv
-import numpy as np
-from sklearn_extra.cluster import KMedoids
-import matplotlib.pyplot as plt
 import random as rnd
-from os import system
+from os import system,listdir
+
+# Function to initialize the environment for trace/assignment generation
+def init(target_folder):
+    # Create target folder (overwrite, if existing)
+    system("rm -R " + target_folder)
+    system("mkdir " + target_folder)
+    # Copy files needed by carbostat
+    system("cp ../../carbostat/carbostat.py .")
+    system("cp ../../carbostat/test/strategies.csv .")
 
 # Downloads emissions data for one given date (day)
 def download_emissions(date='2023-01-28T00:30Z'):
-    fr = parser.parse(date)
+    # Identify starting and end time slot
+    fr = date_parser.parse(date)
     delta = timedelta(days = 1, hours= 0, minutes= 0)
     to = fr + delta
-
+    # Send request to Carbon Intensity API
     headers = {'Accept': 'application/json'}
-
-    url = 'https://api.carbonintensity.org.uk/intensity/' + fr.isoformat() + '/' + to.isoformat()
-    
-    r = requests.get(url, params={}, headers = headers)
-    
+    url = 'https://api.carbonintensity.org.uk/intensity/' + fr.isoformat() + '/' + to.isoformat()  
+    r = requests.get(url, params={}, headers = headers)  
+    # Return values
     res = dict(r.json())['data']
-
     return res
 
-# Generates a list of requests at each slot for a given day
+# Function to generates a list of requests at each 30-min slot for a given day
 def generate_reqs_trace(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 1000), (24,300)]):
     slots = []
     for k in range(len(peaks)):
@@ -43,54 +47,76 @@ def generate_reqs_trace(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 
 
     return slots
 
-# Generates a trace for carbon emissions and requests for a given day
-def generate_traces(date='2023-01-28T00:30Z'):
-    emissions = download_emissions(date)
-    reqs = generate_reqs_trace()
-    return emissions, reqs
+# Function to generate carbon/req traces and write them on csv files
+def generate_csv_values(start_date,days,step,profile,target_folder):
+    # rnd.seed(42) # uncomment, for reproducibility
+    # Create folder for "values"
+    values_folder = target_folder + "/values"
+    system("mkdir " + values_folder)
 
-# Writes the time_slots.csv file with the (forecast and actual) emissions and requests for a given day
-def traces_to_file(date='2023-01-28T00:30Z'):
-    emissions, reqs = generate_traces(date)
-
-    with open('time_slots.csv', 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile, delimiter=',')
-        writer.writerow(['time', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
-        for i in range(0, 48):
-            writer.writerow([emissions[i]['from'], emissions[i]['intensity']['actual'], emissions[i]['intensity']['forecast'], int(reqs[i]+reqs[i]*rnd.uniform(-0.05,0.05)), reqs[i]])
-
-# Inits carbostat on the given inputs
-def carbostat_init():
-    system("cp ../../carbostat/carbostat.py .")
-    system("cp ../../carbostat/test/strategies.csv .")
-    system("mkdir traces")
+    # Repeat generation from "start_date" for given days
+    for d in range(days):
+        # Download emissions
+        date = date_parser.parse(start_date) + timedelta(days=d*step,hours=0,minutes=0)
+        emissions = download_emissions(date.isoformat())
+        # Generate requests
+        reqs = None
+        if profile == "stable":
+            reqs = generate_reqs_trace(peaks = [(4, 300), (8, 300), (12, 300), (16, 300), (20, 300), (24, 300)])
+        else: 
+            reqs = generate_reqs_trace()
+        # Write emissions and requests on CSV file
+        file = values_folder + "/m"
+        file += "0" + str(d+1) if d < 9 else str(d+1)
+        file += ".csv"
+        with open(file, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
+            writer.writerow(['time', 'actual_carbon', 'forecast_carbon', 'actual_reqs', 'forecast_reqs'])
+            for i in range(0, 48):
+                writer.writerow([emissions[i]['from'], emissions[i]['intensity']['actual'], emissions[i]['intensity']['forecast'], int(reqs[i]+reqs[i]*rnd.uniform(-0.05,0.05)), reqs[i]])    
 
 # Runs carbostat on the given inputs
-def carbostat(input_time_slots,input_strategies,error_threshold,output_assignment):
+def run_carbostat(input_time_slots,error_threshold,output_assignment):
     cmd = "python3 carbostat.py "
-    cmd +=  input_time_slots + " "
-    cmd += input_strategies + " "
+    cmd += input_time_slots + " "
+    cmd += "strategies.csv "
     cmd += str(error_threshold) + " "
     cmd += output_assignment
     # run carbostat
     system(cmd)
-    
-def run(seed=42, error_threshold=9, init_date='2023-01-28T00:30Z',days = 12, step = 28):
-    rnd.seed(seed) # for reproducibility
 
-    system("mkdir traces/"+str(error_threshold))
-
-    for d in range(days):
-        traces_to_file(init_date)
-        input_time_slots = "time_slots.csv"
-        input_strategies = "strategies.csv"
-        output_assignment = "./traces/"+str(error_threshold)+"/assignment_m"+str(d+1)+".csv"
-        carbostat(input_time_slots,input_strategies,error_threshold,output_assignment)
-        init_date = (parser.parse(init_date) + timedelta(days=step)).isoformat()
+# Function to generate carbostat's assignments
+def generate_assignment(error_threshold,target_folder):
+    # Create assignment folder
+    assignment_folder = target_folder + "/error_"
+    assignment_folder += "0" + str(error_threshold) if error_threshold < 10 else str(error_threshold)
+    system("mkdir " + assignment_folder)
+    # Run carbostat on all available days
+    values_folder = target_folder + "/values" 
+    days = listdir(values_folder)
+    for day in days:
+        input_time_slots = values_folder + "/" + day
+        output_assignment = assignment_folder + "/assignment_" + day
+        run_carbostat(input_time_slots,error_threshold,output_assignment)    
 
 # ------------------------
 #    RUN
 # ------------------------ 
-carbostat_init()
-for err in [1,2,4,5,8,10,12,15]:
-    run(error_threshold=err)
+# Parse command-line arguments
+parser = ArgumentParser("Run an iteration of the experiment")
+parser.add_argument('profile', type=str, help="Profile of requests (supported: stable,camel)")
+parser.add_argument('target_folder', type=str, help='Folder where to put generated traces/assignments')
+args = parser.parse_args()
+
+# Init trace generation
+init(args.target_folder)
+
+# Create traces
+if args.profile not in ['stable','camel']:
+    print("ERR: Unsupport profile for requests generation")
+    exit(-1)
+
+generate_csv_values("2023-01-28T00:30Z",12,28,args.profile,args.target_folder)
+
+for err in [1,2,4,8]:
+    generate_assignment(err,args.target_folder)
