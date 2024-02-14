@@ -49,7 +49,7 @@ def generate_reqs_trace(peaks = [(4, 100), (8,500), (12, 1000), (16, 500), (20, 
 
 # Function to generate carbon/req traces and write them on csv files
 def generate_csv_values(start_date,days,step,profile,target_folder):
-    # rnd.seed(42) # uncomment, for reproducibility
+    # rnd.seed(42) # uncomment, for reproducibility
     # Create folder for "values"
     values_folder = target_folder + "/values"
     system("mkdir " + values_folder)
