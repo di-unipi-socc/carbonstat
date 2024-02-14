@@ -33,7 +33,7 @@ def import_data(input_time_slots,input_strategies):
 # function to export output data
 def export_assignment(assignment,data,output_assignment):
     output_csv = open(output_assignment,"w")
-    output_csv.write("time_slot,strategy,carbon_actual,carbon_forecast,requests_actual,requests_forecast\n")
+    output_csv.write("time_slot,strategy\n") #,carbon_actual,carbon_forecast,requests_actual,requests_forecast\n")
     for t in range(len(data["time_slots"])):
         output_csv.write(data["time_slots"][t]["time_slot"] + ",")
         output_csv.write(data["strategies"][assignment[t]]["strategy"] + "\n") #",")

@@ -1,4 +1,4 @@
-time_slot,strategy,carbon_actual,carbon_forecast,requests_actual,requests_forecast
+time_slot,strategy
 2023-07-15T00:00Z,LowPower
 2023-07-15T00:30Z,LowPower
 2023-07-15T01:00Z,LowPower

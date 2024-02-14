@@ -1,4 +1,4 @@
-time_slot,strategy,carbon_actual,carbon_forecast,requests_actual,requests_forecast
+time_slot,strategy
 2023-01-28T00:00Z,HighPower
 2023-01-28T00:30Z,HighPower
 2023-01-28T01:00Z,HighPower
