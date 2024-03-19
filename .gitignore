@@ -164,7 +164,7 @@ experiment-deploy.yml
 results.*
 data/experiment/results*
 data/time_error/results*
-data/experiment/carbostat.py
+data/experiment/carbonstat.py
 data/experiment/*.csv
 data/experiment/traces/
 data/experiment/plot/*.pdf

@@ -11,9 +11,9 @@ def init(target_folder):
     # Create target folder (overwrite, if existing)
     system("rm -R " + target_folder)
     system("mkdir " + target_folder)
-    # Copy files needed by carbostat
-    system("cp ../../carbostat/carbostat.py .")
-    system("cp ../../carbostat/test/strategies.csv .")
+    # Copy files needed by carbonstat
+    system("cp ../../carbonstat/carbonstat.py .")
+    system("cp ../../carbonstat/test/strategies.csv .")
 
 # Downloads emissions data for one given date (day)
 def download_emissions(date='2023-01-28T00:30Z'):
@@ -75,29 +75,29 @@ def generate_csv_values(start_date,days,step,profile,target_folder):
             for i in range(0, 48):
                 writer.writerow([emissions[i]['from'], emissions[i]['intensity']['actual'], emissions[i]['intensity']['forecast'], int(reqs[i]+reqs[i]*rnd.uniform(-0.05,0.05)), reqs[i]])    
 
-# Runs carbostat on the given inputs
-def run_carbostat(input_time_slots,error_threshold,output_assignment):
-    cmd = "python3 carbostat.py "
+# Runs carbonstat on the given inputs
+def run_carbonstat(input_time_slots,error_threshold,output_assignment):
+    cmd = "python3 carbonstat.py "
     cmd += input_time_slots + " "
     cmd += "strategies.csv "
     cmd += str(error_threshold) + " "
     cmd += output_assignment
-    # run carbostat
+    # run carbonstat
     system(cmd)
 
-# Function to generate carbostat's assignments
+# Function to generate carbonstat's assignments
 def generate_assignment(error_threshold,target_folder):
     # Create assignment folder
     assignment_folder = target_folder + "/error_"
     assignment_folder += "0" + str(error_threshold) if error_threshold < 10 else str(error_threshold)
     system("mkdir " + assignment_folder)
-    # Run carbostat on all available days
+    # Run carbonstat on all available days
     values_folder = target_folder + "/values" 
     days = listdir(values_folder)
     for day in days:
         input_time_slots = values_folder + "/" + day
         output_assignment = assignment_folder + "/assignment_" + day
-        run_carbostat(input_time_slots,error_threshold,output_assignment)    
+        run_carbonstat(input_time_slots,error_threshold,output_assignment)    
 
 # ------------------------
 #    RUN

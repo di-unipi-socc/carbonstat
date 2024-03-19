@@ -98,11 +98,11 @@ def run_naive(data):
     results["policy"] = "naive"
     return results
 
-# Function to simulate the execution of the "carbostat" policy
-def run_carbostat(data,assignments,error):
+# Function to simulate the execution of the "carbonstat" policy
+def run_carbonstat(data,assignments,error):
     strategy = assignments[error][data["time_slot"]] 
     results = run_strategy(strategy,data)
-    results["policy"] = "carbostat_e=" + str(error)
+    results["policy"] = "carbonstat_e=" + str(error)
     return results
 
 # Function to execute a given strategy "s" on the input "data"
@@ -205,11 +205,11 @@ def run_iteration(input_file,output_file):
         write_output_line(csv_output,results)
         logging.info(preamble + "Simulation of 'naive' completed")
         
-        # Run "carbostat_e=X" policy (with X=1,2,4,8)
+        # Run "carbonstat_e=X" policy (with X=1,2,4,8)
         for e in errors:
-            results = run_carbostat(data,assignments,e)
+            results = run_carbonstat(data,assignments,e)
             write_output_line(csv_output,results)
-            logging.info(preamble + "Simulation of 'carbostat' (e=" + str(e) + ") completed")
+            logging.info(preamble + "Simulation of 'carbonstat' (e=" + str(e) + ") completed")
 
     # Undeploy application
     system("docker compose down >> /dev/null 2>> /dev/null")
