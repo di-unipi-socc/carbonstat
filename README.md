@@ -1,4 +1,4 @@
-# CAS: Carbon-Aware Strategies (for containerized services)
+# carbonstat
 To run the current app: 
 ```
 $ docker-compose build
