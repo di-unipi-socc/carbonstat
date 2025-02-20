@@ -1,23 +1,17 @@
-# Estimating average elapsed time and error of available strategies
-This folder provides a set of scripts exemplifying how to measure the elapsed time and error (on average) for the different strategies implemented by a carbon-aware-service. In particular, we provide a concrete example based on the `carbon-aware-service.py` available in this repository.
+# Carbonstat
 
-## Running the estimator
-To obtain an esteem of the average time and error of `carbon-aware-service.py` on a given machine, please run the available shell script:
-```
-./run.sh
-```
-This will generate two files:
-* `results_raw.csv` containing the results obtained by each available strategy in each iteration, and
-* `results.csv` containing the average time (in ms) and error over all iterations.
+Carbonstat is an open-source prototype for configuring and optimising carbon-aware software services. It selects execution strategies to minimise carbon emissions while maintaining a target quality of service.
 
-The number of iterations can be configured by changing the value of the variable `ITERATIONS` within the script `run.sh`. Instead, the number of requests to send to each strategy in each iteration can be configured by changing the value of the variable `requests` in `run_strategies.py`.
+Carbonstat methodology is described in the following article:
 
-## Example of results
-An example of the content of the `results.csv` file is provided below:
-``` 
-strategy,elapsed_time,error
-HighPower,100.2091,0.0
-MediumPower,66.2948,4.4752
-LowPower,35.2861,13.4267
-```
-This was obtained by running the esteem on a Ubuntu 20.04 LTS virtual machine with 32 GB of RAM.
+> [Stefano Forti](http://pages.di.unipi.it/forti), [Jacopo Soldani](http://pages.di.unipi.it/soldani), [Antonio Brogi](http://pages.di.unipi.it/brogi)<br>
+> [**Carbon-aware Software Services**](https://doi.org/10.1007/978-3-031-84617-5_6), <br>	
+> *11th European Conference On Service-Oriented And Cloud Computing (ESOCC), 2025*
+
+If you wish to reuse source code in this repo, please consider citing it.
+
+## Features of carbonstat
+- Implementation based on the Strategy pattern
+- Carbon-aware optimization based on forecasted carbon intensity and request rates
+- Configurable trade-off between energy consumption and output quality
+- Open-source Python prototype using Google OR-Tools
